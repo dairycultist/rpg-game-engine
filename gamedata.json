@@ -5,12 +5,29 @@
         "player_y": 8.0,
         "flags": [ "talked_to_friend" ],
         "moves": [
-            { "name": "slash", "cost": 2 },
-            { "name": "healing song", "cost": 5 }
-        ]
+            { "display_name": "slash", "cost": 2 },
+            { "display_name": "healing song", "cost": 5 }
+        ],
+        "player_map_sprites": {
+            "N": "player_north.png",
+            "E": "player_east.png",
+            "S": "player_south.png",
+            "W": "player_west.png"
+        }
     },
     "characters": {
-
+        "player": {
+            "display_name": "John",
+            "talk_sprites": {
+                "DEFAULT": "player_talk.png"
+            }
+        }
+    },
+    "enemies": {
+        "friend": {
+            "display_name": "Jake",
+            "sprite": "jake.png"
+        }
     },
     "rooms": {
         "bedroom": {
@@ -20,28 +37,28 @@
                     "place_condition": "!talked_to_friend",
                     "x": 4,
                     "y": 10,
-                    "sprite": 18,
+                    "sprite": "friend.png",
                     "on_interact": {
                         "!talked_to_friend": [
-                            { "type": "dialogue", "character": "friend", "text": "You need to learn how to battle." },
-                            { "type": "dialogue", "character": "friend", "text": "Let me show you the ropes." },
+                            { "type": "dialogue", "character": "friend", "side": "right", "text": "You need to learn how to battle." },
+                            { "type": "dialogue", "character": "friend", "side": "right", "text": "Let me show you the ropes." },
                             { "type": "choose_continue", "text": "Ready to learn how to battle?" },
-                            { "type": "start_battle", "enemies": [ "" ] },
+                            { "type": "battle", "enemies": [ "friend" ] },
                             { "type": "set_flag", "flag": "talked_to_friend" },
-                            { "type": "dialogue", "character": "friend", "text": "Good work. Now get out there!" }
+                            { "type": "dialogue", "character": "friend", "side": "right", "text": "Good work. Now get out there!" }
                         ],
                         "DEFAULT": [
-                            { "type": "dialogue", "character": "friend", "text": "Good work. Now get out there!" }
+                            { "type": "dialogue", "character": "friend", "side": "right", "text": "Good work. Now get out there!" }
                         ]
                     }
                 },
                 {
                     "x": 4,
                     "y": 5,
-                    "sprite": 11,
+                    "sprite": "door.png",
                     "on_interact": {
                         "!talked_to_friend": [
-                            { "type": "dialogue", "character": "PLAYER", "text": "I need to learn how to battle first!" }
+                            { "type": "dialogue", "character": "player", "side": "left", "text": "I need to learn how to battle first!" }
                         ],
                         "DEFAULT": [
                             { "type": "choose_continue", "text": "Go outside?" },
