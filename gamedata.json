@@ -1,0 +1,55 @@
+{
+    "state": {
+        "curr_room": "bedroom",
+        "player_x": 5.0,
+        "player_y": 8.0,
+        "flags": [ "talked_to_friend" ],
+        "moves": [
+            { "name": "slash", "cost": 2 },
+            { "name": "healing song", "cost": 5 }
+        ]
+    },
+    "characters": {
+
+    },
+    "rooms": {
+        "bedroom": {
+            "tile_data": "20,0,10,7,6,6,3,6,2,...",
+            "interactables": [
+                {
+                    "place_condition": "!talked_to_friend",
+                    "x": 4,
+                    "y": 10,
+                    "sprite": 18,
+                    "on_interact": {
+                        "!talked_to_friend": [
+                            { "type": "dialogue", "character": "friend", "text": "You need to learn how to battle." },
+                            { "type": "dialogue", "character": "friend", "text": "Let me show you the ropes." },
+                            { "type": "choose_continue", "text": "Ready to learn how to battle?" },
+                            { "type": "start_battle", "enemies": [ "" ] },
+                            { "type": "set_flag", "flag": "talked_to_friend" },
+                            { "type": "dialogue", "character": "friend", "text": "Good work. Now get out there!" }
+                        ],
+                        "DEFAULT": [
+                            { "type": "dialogue", "character": "friend", "text": "Good work. Now get out there!" }
+                        ]
+                    }
+                },
+                {
+                    "x": 4,
+                    "y": 5,
+                    "sprite": 11,
+                    "on_interact": {
+                        "!talked_to_friend": [
+                            { "type": "dialogue", "character": "PLAYER", "text": "I need to learn how to battle first!" }
+                        ],
+                        "DEFAULT": [
+                            { "type": "choose_continue", "text": "Go outside?" },
+                            { "type": "change_room", "room": "outside", "x": 10, "y": 20 }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}
