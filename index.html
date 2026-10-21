@@ -5,7 +5,7 @@
 	<title>RPG</title>
 	<script>
 
-        let gamedata = {
+        const gamedata = {
             "player_x": 5.0,
             "player_y": 8.0,
             "flags": [],
@@ -15,12 +15,18 @@
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "Hi John!" },
                     { "type": "dialogue", "left": "john", "right": "mary", "text": "And then a meteor hit the planet..." }
                 ]
+            },
+            "sprites": {
+                "https://upload.wikimedia.org/wikipedia/en/d/db/Undertale_Combat_Example.png": ""
             }
         };
 
 		let render;
 
 		function start() {
+
+            for (key of Object.keys(gamedata.sprites))
+                gamedata.sprites[key] = document.getElementById(key);
 
 			render = document.getElementById("canvas").getContext("2d");
 
@@ -54,6 +60,9 @@
                     drawDialogue(event);
                 }
             }
+
+            // test
+            render.drawImage(gamedata.sprites[Object.keys(gamedata.sprites)[0]], 10, 10, 80, 80);
         }
 
         function drawDialogue(dialogueEvent) {
@@ -95,6 +104,12 @@
 	</script>
 </head>
 <body onload="start();" style="margin: 0; justify-content: center; display: flex;">
+
+    <script>
+        // get the browser to load all the images
+        for (key of Object.keys(gamedata.sprites))
+            document.write(`<img src="${ key }" id="${ key }" style="display: none;">`); 
+    </script>
 
     <canvas id="canvas" width="256" height="192" style="height: 100vh; margin: 0; image-rendering: pixelated;"></canvas>
 
