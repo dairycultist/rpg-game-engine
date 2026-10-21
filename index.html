@@ -6,11 +6,14 @@
 	<script>
 
         let gamedata = {
+            "player_x": 5.0,
+            "player_y": 8.0,
+            "flags": [],
             "state": {
                 "event_queue": [
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "left", "text": "Hi Mary!" },
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "Hi John!" },
-                    { "type": "dialogue", "left": "john", "right": "mary", "speaker": undefined, "text": "And then a meteor hit the planet..." }
+                    { "type": "dialogue", "left": "john", "right": "mary", "text": "And then a meteor hit the planet..." }
                 ]
             }
         };
@@ -27,7 +30,8 @@
 
 				if (event.key === ' ') {
 
-					gamedata.state.event_queue.splice(0, 1);
+                    if (gamedata.state.event_queue.length != 0)
+					    gamedata.state.event_queue.splice(0, 1);
 				}
 			});
 		}
@@ -38,10 +42,21 @@
             render.fillStyle = "black";
             render.fillRect(0, 0, 256, 192);
 
-            drawDialogue(gamedata.state.event_queue[0]);
+            if (gamedata.state.event_queue.length == 0) {
+
+                // an empty event queue means we're in "map navigation" mode
+
+            } else {
+
+                const event = gamedata.state.event_queue[0];
+
+                if (event.type == "dialogue") {
+                    drawDialogue(event);
+                }
+            }
         }
 
-        function drawDialogue(dialogueObject) {
+        function drawDialogue(dialogueEvent) {
 
             render.fillStyle = "black";
             render.lineWidth = "2";
@@ -52,29 +67,29 @@
             render.strokeRect(4, 138, 248, 50);
 
             render.fillStyle = "white";
-            render.fillText(dialogueObject.text, 10, 156);
+            render.fillText(dialogueEvent.text, 10, 156);
 
-            if (dialogueObject.speaker == "left") {
+            if (dialogueEvent.speaker == "left") {
 
-                const nameplate_width = dialogueObject.left.length * 6 + 20;
+                const nameplate_width = dialogueEvent.left.length * 6 + 20;
 
                 render.fillStyle = "black";
                 render.fillRect(4, 113, nameplate_width, 25);
                 render.strokeRect(4, 113, nameplate_width, 25);
 
                 render.fillStyle = "white";
-                render.fillText(dialogueObject.left, 10, 131);
+                render.fillText(dialogueEvent.left, 10, 131);
 
-            } else if (dialogueObject.speaker == "right") {
+            } else if (dialogueEvent.speaker == "right") {
 
-                const nameplate_width = dialogueObject.right.length * 6 + 20;
+                const nameplate_width = dialogueEvent.right.length * 6 + 20;
 
                 render.fillStyle = "black";
                 render.fillRect(252 - nameplate_width, 113, nameplate_width, 25);
                 render.strokeRect(252 - nameplate_width, 113, nameplate_width, 25);
 
                 render.fillStyle = "white";
-                render.fillText(dialogueObject.right, 258 - nameplate_width, 131);
+                render.fillText(dialogueEvent.right, 258 - nameplate_width, 131);
             }
         }
 	</script>
