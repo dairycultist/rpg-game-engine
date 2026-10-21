@@ -1,6 +1,6 @@
 # simple RPG game engine
 
-fixed screen resolution (16x12 tiles)
+fixed screen resolution (16x12 tiles / 256x192 pixels)
 
 fixed tile size (16x16)
 

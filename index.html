@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>RPG</title>
+	<script>
+
+        let gamedata = {
+            "state": {
+                "event_queue": [
+                    { "type": "dialogue", "left": "john", "right": "mary", "speaker": "left", "text": "Hi Mary!" },
+                    { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "Hi John!" },
+                    { "type": "dialogue", "left": "john", "right": "mary", "speaker": undefined, "text": "And then a meteor hit the planet..." }
+                ]
+            }
+        };
+
+		let render;
+
+		function start() {
+
+			render = document.getElementById("canvas").getContext("2d");
+
+            setInterval(update, 1000 / 60);
+
+			document.addEventListener("keydown", (event) => {
+
+				if (event.key === ' ') {
+
+					gamedata.state.event_queue.splice(0, 1);
+				}
+			});
+		}
+
+        function update() {
+
+            // clear
+            render.fillStyle = "black";
+            render.fillRect(0, 0, 256, 192);
+
+            drawDialogue(gamedata.state.event_queue[0]);
+        }
+
+        function drawDialogue(dialogueObject) {
+
+            render.fillStyle = "black";
+            render.lineWidth = "2";
+            render.strokeStyle = "white";
+            render.font = "12px monospace";
+
+            render.fillRect(4, 138, 248, 50);
+            render.strokeRect(4, 138, 248, 50);
+
+            render.fillStyle = "white";
+            render.fillText(dialogueObject.text, 10, 156);
+
+            if (dialogueObject.speaker == "left") {
+
+                const nameplate_width = dialogueObject.left.length * 6 + 20;
+
+                render.fillStyle = "black";
+                render.fillRect(4, 113, nameplate_width, 25);
+                render.strokeRect(4, 113, nameplate_width, 25);
+
+                render.fillStyle = "white";
+                render.fillText(dialogueObject.left, 10, 131);
+
+            } else if (dialogueObject.speaker == "right") {
+
+                const nameplate_width = dialogueObject.right.length * 6 + 20;
+
+                render.fillStyle = "black";
+                render.fillRect(252 - nameplate_width, 113, nameplate_width, 25);
+                render.strokeRect(252 - nameplate_width, 113, nameplate_width, 25);
+
+                render.fillStyle = "white";
+                render.fillText(dialogueObject.right, 258 - nameplate_width, 131);
+            }
+        }
+	</script>
+</head>
+<body onload="start();" style="margin: 0; justify-content: center; display: flex;">
+
+    <canvas id="canvas" width="256" height="192" style="height: 100vh; margin: 0; image-rendering: pixelated;"></canvas>
+
+</body>
+</html>

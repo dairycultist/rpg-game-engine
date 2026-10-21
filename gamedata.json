@@ -7,13 +7,13 @@
         "moves": [
             { "display_name": "slash", "cost": 2 },
             { "display_name": "healing song", "cost": 5 }
-        ],
-        "player_map_sprites": {
-            "N": "player_north.png",
-            "E": "player_east.png",
-            "S": "player_south.png",
-            "W": "player_west.png"
-        }
+        ]
+    },
+    "player_map_sprites": {
+        "N": "player_north.png",
+        "E": "player_east.png",
+        "S": "player_south.png",
+        "W": "player_west.png"
     },
     "characters": {
         "player": {
