@@ -13,22 +13,36 @@
                 "event_queue": [
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "left", "text": "Hi Mary!" },
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "Hi John!" },
-                    { "type": "choice", "choices": [
-                        {
-                            "text": "Eat an apple",
-                            "event_queue": [
-                                { "type": "dialogue", "left": "john", "right": "mary", "text": "You picked eat an apple!" }
-                            ]
-                        },
-                        {
-                            "text": "Eat an orange",
-                            "event_queue": [
-                                { "type": "dialogue", "left": "john", "right": "mary", "text": "You picked eat an orange..." },
-                                { "type": "dialogue", "left": "john", "right": "mary", "text": "I don't like oranges..." }
-                            ]
-                        },
-                    ] },
-                    { "type": "dialogue", "left": "john", "right": "mary", "text": "And then a meteor hit the planet..." }
+                    {
+                        "type": "choice",
+                        "choices": [
+                            {
+                                "text": "Eat an apple",
+                                "event_queue": [
+                                    { "type": "dialogue", "left": "john", "right": "mary", "text": "You picked eat an apple!" },
+                                    { "type": "set_flag", "flag": "ate_apple" }
+                                ]
+                            },
+                            {
+                                "text": "Eat an orange",
+                                "event_queue": [
+                                    { "type": "dialogue", "left": "john", "right": "mary", "text": "You picked eat an orange..." },
+                                    { "type": "dialogue", "left": "john", "right": "mary", "text": "I don't like oranges..." }
+                                ]
+                            },
+                        ]
+                    },
+                    { "type": "dialogue", "left": "john", "right": "mary", "text": "And then a meteor hit the planet..." },
+                    {
+                        "type": "if",
+                        "condition": { "type": "flag", "value": "ate_apple" }, // we'll store more complex conditions as an AST
+                        "event_queue_on_true": [
+                            { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "At least you got to eat an apple!" }
+                        ],
+                        "event_queue_on_false": [
+                            { "type": "dialogue", "left": "john", "right": "mary", "text": "It's because you ate that orange..." }
+                        ]
+                    },
                 ]
             },
             "sprites": {
@@ -49,27 +63,30 @@
 
 			document.addEventListener("keydown", (event) => {
 
-                if (gamedata.state.event_queue[0].type == "choice") {
+                const curr_event = gamedata.state.event_queue[0];
+
+                if (curr_event.type == "choice") {
 
                     if (event.key == "ArrowUp") {
                         
-                        gamedata.state.event_queue[0].selected_i--;
+                        curr_event.selected_i--;
 
-                        if (gamedata.state.event_queue[0].selected_i < 0)
-                            gamedata.state.event_queue[0].selected_i = gamedata.state.event_queue[0].choices.length - 1;
+                        if (curr_event.selected_i < 0)
+                            curr_event.selected_i = curr_event.choices.length - 1;
                     }
 
                     if (event.key == "ArrowDown") {
                         
-                        gamedata.state.event_queue[0].selected_i++;
+                        curr_event.selected_i++;
 
-                        if (gamedata.state.event_queue[0].selected_i >= gamedata.state.event_queue[0].choices.length)
-                            gamedata.state.event_queue[0].selected_i = 0;
+                        if (curr_event.selected_i >= curr_event.choices.length)
+                            curr_event.selected_i = 0;
                     }
                 }
                 
                 if (event.key === ' ' && gamedata.state.event_queue.length != 0) {
 
+                    // remove the current event and do removal processing if appropriate
                     const removed_event = gamedata.state.event_queue.splice(0, 1)[0];
 
                     if (removed_event.type == "choice") {
@@ -80,20 +97,31 @@
 
                     // move to the next "display" event. some events are "process" events that
                     // change the state but which we aren't supposed to stick around on
-
                     while (gamedata.state.event_queue.length != 0) {
 
                         const event = gamedata.state.event_queue[0];
 
                         if (event.type == "dialogue") {
+
                             break;
+
                         } else if (event.type == "choice") {
+
                             event.selected_i = 0;
                             break;
+
                         } else if (event.type == "set_flag") {
+
+                            if (!gamedata.flags.includes(event.flag))
+                                gamedata.flags.push(event.flag);
 
                         } else if (event.type == "if") {
 
+                            if (evaluateCondition(event.condition)) {
+                                gamedata.state.event_queue.splice(1, 0, ...event.event_queue_on_true);
+                            } else if (event.event_queue_on_false) {
+                                gamedata.state.event_queue.splice(1, 0, ...event.event_queue_on_false);
+                            }
                         }
 
                         gamedata.state.event_queue.splice(0, 1);
@@ -101,6 +129,18 @@
 				}
 			});
 		}
+
+        function evaluateCondition(condition) {
+
+            if (condition.type == "flag") {
+
+                return gamedata.flags.includes(condition.value);
+
+            } else {
+
+                alert("unsupported condition!");
+            }
+        }
 
         function update() {
 
