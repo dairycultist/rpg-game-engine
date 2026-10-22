@@ -13,13 +13,13 @@
                 "john": {
                     "display_name": "John",
                     "talk_sprites": {
-                        "DEFAULT": "https://upload.wikimedia.org/wikipedia/en/d/db/Undertale_Combat_Example.png"
+                        "DEFAULT": "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg"
                     }
                 },
                 "mary": {
                     "display_name": "Mary",
                     "talk_sprites": {
-                        "DEFAULT": "https://upload.wikimedia.org/wikipedia/en/d/db/Undertale_Combat_Example.png"
+                        "DEFAULT": "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg"
                     }
                 }
             },
@@ -60,7 +60,7 @@
                 ]
             },
             "sprites": {
-                "https://upload.wikimedia.org/wikipedia/en/d/db/Undertale_Combat_Example.png": ""
+                "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg": ""
             }
         };
 
@@ -196,7 +196,9 @@
                     render.filter = "none";
                 else
                     render.filter = "brightness(80%)";
-                render.drawImage(gamedata.sprites[gamedata.characters[event.left].talk_sprites["DEFAULT"]], 140, 30, 80, 80, 3, 9, 128, 128);
+
+                const image = gamedata.sprites[gamedata.characters[event.left].talk_sprites["DEFAULT"]];
+                render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
             }
 
             if (event.right) {
@@ -205,7 +207,13 @@
                     render.filter = "none";
                 else
                     render.filter = "brightness(80%)";
-                render.drawImage(gamedata.sprites[gamedata.characters[event.right].talk_sprites["DEFAULT"]], 140, 30, 80, 80, 125, 9, 128, 128);
+
+                render.save();
+                render.translate(256, 0);
+                render.scale(-1, 1);
+                const image = gamedata.sprites[gamedata.characters[event.left].talk_sprites["DEFAULT"]];
+                render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
+                render.restore();
             }
 
             render.filter = "none";
