@@ -9,6 +9,20 @@
             "player_x": 5.0,
             "player_y": 8.0,
             "flags": [],
+            "characters": {
+                "john": {
+                    "display_name": "John",
+                    "talk_sprites": {
+                        "DEFAULT": "player_talk.png"
+                    }
+                },
+                "mary": {
+                    "display_name": "Mary",
+                    "talk_sprites": {
+                        "DEFAULT": "player_talk.png"
+                    }
+                }
+            },
             "state": {
                 "event_queue": [
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "left", "text": "Hi Mary!" },
@@ -40,7 +54,7 @@
                             { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "At least you got to eat an apple!" }
                         ],
                         "event_queue_on_false": [
-                            { "type": "dialogue", "left": "john", "right": "mary", "text": "It's because you ate that orange..." }
+                            { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "It's because you ate that orange..." }
                         ]
                     },
                 ]
@@ -54,93 +68,17 @@
 
 		function start() {
 
+            // gather all images from the DOM into the gamedata
             for (key of Object.keys(gamedata.sprites))
                 gamedata.sprites[key] = document.getElementById(key);
 
+            // initialize renderer
 			render = document.getElementById("canvas").getContext("2d");
 
             setInterval(update, 1000 / 60);
 
-			document.addEventListener("keydown", (event) => {
-
-                const curr_event = gamedata.state.event_queue[0];
-
-                if (curr_event.type == "choice") {
-
-                    if (event.key == "ArrowUp") {
-                        
-                        curr_event.selected_i--;
-
-                        if (curr_event.selected_i < 0)
-                            curr_event.selected_i = curr_event.choices.length - 1;
-                    }
-
-                    if (event.key == "ArrowDown") {
-                        
-                        curr_event.selected_i++;
-
-                        if (curr_event.selected_i >= curr_event.choices.length)
-                            curr_event.selected_i = 0;
-                    }
-                }
-                
-                if (event.key === ' ' && gamedata.state.event_queue.length != 0) {
-
-                    // remove the current event and do removal processing if appropriate
-                    const removed_event = gamedata.state.event_queue.splice(0, 1)[0];
-
-                    if (removed_event.type == "choice") {
-                    
-                        // insert selected choice's event queue into event queue
-                        gamedata.state.event_queue.splice(0, 0, ...removed_event.choices[removed_event.selected_i].event_queue);
-                    }
-
-                    // move to the next "display" event. some events are "process" events that
-                    // change the state but which we aren't supposed to stick around on
-                    while (gamedata.state.event_queue.length != 0) {
-
-                        const event = gamedata.state.event_queue[0];
-
-                        if (event.type == "dialogue") {
-
-                            break;
-
-                        } else if (event.type == "choice") {
-
-                            event.selected_i = 0;
-                            break;
-
-                        } else if (event.type == "set_flag") {
-
-                            if (!gamedata.flags.includes(event.flag))
-                                gamedata.flags.push(event.flag);
-
-                        } else if (event.type == "if") {
-
-                            if (evaluateCondition(event.condition)) {
-                                gamedata.state.event_queue.splice(1, 0, ...event.event_queue_on_true);
-                            } else if (event.event_queue_on_false) {
-                                gamedata.state.event_queue.splice(1, 0, ...event.event_queue_on_false);
-                            }
-                        }
-
-                        gamedata.state.event_queue.splice(0, 1);
-                    }
-				}
-			});
+			document.addEventListener("keydown", onKeyDown);
 		}
-
-        function evaluateCondition(condition) {
-
-            if (condition.type == "flag") {
-
-                return gamedata.flags.includes(condition.value);
-
-            } else {
-
-                alert("unsupported condition!");
-            }
-        }
 
         function update() {
 
@@ -164,7 +102,92 @@
             }
 
             // test
-            render.drawImage(gamedata.sprites[Object.keys(gamedata.sprites)[0]], 10, 10, 80, 80);
+            render.drawImage(gamedata.sprites[Object.keys(gamedata.sprites)[0]], 140, 40, 80, 80, 10, 10, 80, 80);
+        }
+
+        function onKeyDown(keyevent) {
+
+            const curr_event = gamedata.state.event_queue[0];
+
+            if (curr_event.type == "choice") {
+
+                if (keyevent.key == "ArrowUp") {
+                    
+                    curr_event.selected_i--;
+
+                    if (curr_event.selected_i < 0)
+                        curr_event.selected_i = curr_event.choices.length - 1;
+                }
+
+                if (keyevent.key == "ArrowDown") {
+                    
+                    curr_event.selected_i++;
+
+                    if (curr_event.selected_i >= curr_event.choices.length)
+                        curr_event.selected_i = 0;
+                }
+            }
+            
+            if (keyevent.key === ' ' && gamedata.state.event_queue.length != 0) {
+
+                progressEventQueue();
+            }
+        }
+
+        function progressEventQueue() {
+
+            // remove the current event and do removal processing if appropriate
+            const removed_event = gamedata.state.event_queue.splice(0, 1)[0];
+
+            if (removed_event.type == "choice") {
+            
+                // insert selected choice's event queue into event queue
+                gamedata.state.event_queue.splice(0, 0, ...removed_event.choices[removed_event.selected_i].event_queue);
+            }
+
+            // move to the next "display" event. some events are "process" events that
+            // change the state but which we aren't supposed to stick around on
+            while (gamedata.state.event_queue.length != 0) {
+
+                const event = gamedata.state.event_queue[0];
+
+                if (event.type == "dialogue") {
+
+                    break;
+
+                } else if (event.type == "choice") {
+
+                    event.selected_i = 0;
+                    break;
+
+                } else if (event.type == "set_flag") {
+
+                    if (!gamedata.flags.includes(event.flag))
+                        gamedata.flags.push(event.flag);
+
+                } else if (event.type == "if") {
+
+                    if (evaluateCondition(event.condition)) {
+                        gamedata.state.event_queue.splice(1, 0, ...event.event_queue_on_true);
+                    } else if (event.event_queue_on_false) {
+                        gamedata.state.event_queue.splice(1, 0, ...event.event_queue_on_false);
+                    }
+                }
+
+                gamedata.state.event_queue.splice(0, 1);
+            }
+        }
+
+        function evaluateCondition(condition) {
+
+            if (condition.type == "flag") {
+
+                return gamedata.flags.includes(condition.value);
+
+            } else {
+
+                alert("unsupported condition!");
+            }
         }
 
         function drawDialogue(event) {
@@ -182,25 +205,25 @@
 
             if (event.speaker == "left") {
 
-                const nameplate_width = event.left.length * 6 + 20;
+                const nameplate_width = event.left.length * 5 + 20;
 
                 render.fillStyle = "black";
                 render.fillRect(4, 113, nameplate_width, 25);
                 render.strokeRect(4, 113, nameplate_width, 25);
 
                 render.fillStyle = "white";
-                render.fillText(event.left, 10, 131);
+                render.fillText(gamedata.characters[event.left].display_name, 10, 130);
 
             } else if (event.speaker == "right") {
 
-                const nameplate_width = event.right.length * 6 + 20;
+                const nameplate_width = event.right.length * 5 + 20;
 
                 render.fillStyle = "black";
                 render.fillRect(252 - nameplate_width, 113, nameplate_width, 25);
                 render.strokeRect(252 - nameplate_width, 113, nameplate_width, 25);
 
                 render.fillStyle = "white";
-                render.fillText(event.right, 258 - nameplate_width, 131);
+                render.fillText(gamedata.characters[event.right].display_name, 258 - nameplate_width, 130);
             }
         }
 
