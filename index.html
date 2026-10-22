@@ -13,6 +13,21 @@
                 "event_queue": [
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "left", "text": "Hi Mary!" },
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "Hi John!" },
+                    { "type": "choice", "choices": [
+                        {
+                            "text": "Eat an apple",
+                            "event_queue": [
+                                { "type": "dialogue", "left": "john", "right": "mary", "text": "You picked eat an apple!" }
+                            ]
+                        },
+                        {
+                            "text": "Eat an orange",
+                            "event_queue": [
+                                { "type": "dialogue", "left": "john", "right": "mary", "text": "You picked eat an orange..." },
+                                { "type": "dialogue", "left": "john", "right": "mary", "text": "I don't like oranges..." }
+                            ]
+                        },
+                    ] },
                     { "type": "dialogue", "left": "john", "right": "mary", "text": "And then a meteor hit the planet..." }
                 ]
             },
@@ -36,8 +51,25 @@
 
 				if (event.key === ' ') {
 
-                    if (gamedata.state.event_queue.length != 0)
+                    // repeatedly remove and process states until we reach a dialogue or something
+                    if (gamedata.state.event_queue.length != 0) {
+
 					    gamedata.state.event_queue.splice(0, 1);
+
+                        while (gamedata.state.event_queue.length != 0 && gamedata.state.event_queue[0].type != "dialogue") {
+
+                            const event = gamedata.state.event_queue[0];
+
+                            if (event.type == "choice") {
+
+                                // just pick the first choice by default for now
+                                // insert selected choice's event queue into event queue
+                                gamedata.state.event_queue.splice(1, 0, ...event.choices[0].event_queue);
+                            }
+
+                            gamedata.state.event_queue.splice(0, 1);
+                        }
+                    }
 				}
 			});
 		}
