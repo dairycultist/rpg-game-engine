@@ -13,13 +13,13 @@
                 "john": {
                     "display_name": "John",
                     "talk_sprites": {
-                        "DEFAULT": "player_talk.png"
+                        "DEFAULT": "https://upload.wikimedia.org/wikipedia/en/d/db/Undertale_Combat_Example.png"
                     }
                 },
                 "mary": {
                     "display_name": "Mary",
                     "talk_sprites": {
-                        "DEFAULT": "player_talk.png"
+                        "DEFAULT": "https://upload.wikimedia.org/wikipedia/en/d/db/Undertale_Combat_Example.png"
                     }
                 }
             },
@@ -100,9 +100,6 @@
                     drawChoice(event);
                 }
             }
-
-            // test
-            render.drawImage(gamedata.sprites[Object.keys(gamedata.sprites)[0]], 140, 40, 80, 80, 10, 10, 80, 80);
         }
 
         function onKeyDown(keyevent) {
@@ -192,6 +189,28 @@
 
         function drawDialogue(event) {
 
+            // draw characters
+            if (event.left) {
+
+                if (event.speaker == "left")
+                    render.filter = "none";
+                else
+                    render.filter = "brightness(80%)";
+                render.drawImage(gamedata.sprites[gamedata.characters[event.left].talk_sprites["DEFAULT"]], 140, 30, 80, 80, 3, 9, 128, 128);
+            }
+
+            if (event.right) {
+
+                if (event.speaker == "right")
+                    render.filter = "none";
+                else
+                    render.filter = "brightness(80%)";
+                render.drawImage(gamedata.sprites[gamedata.characters[event.right].talk_sprites["DEFAULT"]], 140, 30, 80, 80, 125, 9, 128, 128);
+            }
+
+            render.filter = "none";
+
+            // the dialogue box stuff
             render.fillStyle = "black";
             render.lineWidth = "2";
             render.strokeStyle = "white";
