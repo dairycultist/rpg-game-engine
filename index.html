@@ -49,26 +49,54 @@
 
 			document.addEventListener("keydown", (event) => {
 
-				if (event.key === ' ') {
+                if (gamedata.state.event_queue[0].type == "choice") {
 
-                    // repeatedly remove and process states until we reach a dialogue or something
-                    if (gamedata.state.event_queue.length != 0) {
+                    if (event.key == "ArrowUp") {
+                        
+                        gamedata.state.event_queue[0].selected_i--;
 
-					    gamedata.state.event_queue.splice(0, 1);
+                        if (gamedata.state.event_queue[0].selected_i < 0)
+                            gamedata.state.event_queue[0].selected_i = gamedata.state.event_queue[0].choices.length - 1;
+                    }
 
-                        while (gamedata.state.event_queue.length != 0 && gamedata.state.event_queue[0].type != "dialogue") {
+                    if (event.key == "ArrowDown") {
+                        
+                        gamedata.state.event_queue[0].selected_i++;
 
-                            const event = gamedata.state.event_queue[0];
+                        if (gamedata.state.event_queue[0].selected_i >= gamedata.state.event_queue[0].choices.length)
+                            gamedata.state.event_queue[0].selected_i = 0;
+                    }
+                }
+                
+                if (event.key === ' ' && gamedata.state.event_queue.length != 0) {
 
-                            if (event.type == "choice") {
+                    const removed_event = gamedata.state.event_queue.splice(0, 1)[0];
 
-                                // just pick the first choice by default for now
-                                // insert selected choice's event queue into event queue
-                                gamedata.state.event_queue.splice(1, 0, ...event.choices[0].event_queue);
-                            }
+                    if (removed_event.type == "choice") {
+                    
+                        // insert selected choice's event queue into event queue
+                        gamedata.state.event_queue.splice(0, 0, ...removed_event.choices[removed_event.selected_i].event_queue);
+                    }
 
-                            gamedata.state.event_queue.splice(0, 1);
+                    // move to the next "display" event. some events are "process" events that
+                    // change the state but which we aren't supposed to stick around on
+
+                    while (gamedata.state.event_queue.length != 0) {
+
+                        const event = gamedata.state.event_queue[0];
+
+                        if (event.type == "dialogue") {
+                            break;
+                        } else if (event.type == "choice") {
+                            event.selected_i = 0;
+                            break;
+                        } else if (event.type == "set_flag") {
+
+                        } else if (event.type == "if") {
+
                         }
+
+                        gamedata.state.event_queue.splice(0, 1);
                     }
 				}
 			});
@@ -90,6 +118,8 @@
 
                 if (event.type == "dialogue") {
                     drawDialogue(event);
+                } else if (event.type == "choice") {
+                    drawChoice(event);
                 }
             }
 
@@ -97,7 +127,7 @@
             render.drawImage(gamedata.sprites[Object.keys(gamedata.sprites)[0]], 10, 10, 80, 80);
         }
 
-        function drawDialogue(dialogueEvent) {
+        function drawDialogue(event) {
 
             render.fillStyle = "black";
             render.lineWidth = "2";
@@ -108,29 +138,46 @@
             render.strokeRect(4, 138, 248, 50);
 
             render.fillStyle = "white";
-            render.fillText(dialogueEvent.text, 10, 156);
+            render.fillText(event.text, 10, 156);
 
-            if (dialogueEvent.speaker == "left") {
+            if (event.speaker == "left") {
 
-                const nameplate_width = dialogueEvent.left.length * 6 + 20;
+                const nameplate_width = event.left.length * 6 + 20;
 
                 render.fillStyle = "black";
                 render.fillRect(4, 113, nameplate_width, 25);
                 render.strokeRect(4, 113, nameplate_width, 25);
 
                 render.fillStyle = "white";
-                render.fillText(dialogueEvent.left, 10, 131);
+                render.fillText(event.left, 10, 131);
 
-            } else if (dialogueEvent.speaker == "right") {
+            } else if (event.speaker == "right") {
 
-                const nameplate_width = dialogueEvent.right.length * 6 + 20;
+                const nameplate_width = event.right.length * 6 + 20;
 
                 render.fillStyle = "black";
                 render.fillRect(252 - nameplate_width, 113, nameplate_width, 25);
                 render.strokeRect(252 - nameplate_width, 113, nameplate_width, 25);
 
                 render.fillStyle = "white";
-                render.fillText(dialogueEvent.right, 258 - nameplate_width, 131);
+                render.fillText(event.right, 258 - nameplate_width, 131);
+            }
+        }
+
+        function drawChoice(event) {
+
+            render.fillStyle = "black";
+            render.lineWidth = "2";
+            render.strokeStyle = "white";
+            render.font = "12px monospace";
+
+            render.fillRect(4, 138, 248, 50);
+            render.strokeRect(4, 138, 248, 50);
+
+            for (let i = 0; i < event.choices.length; i++) {
+
+                render.fillStyle = i == event.selected_i ? "yellow" : "white";
+                render.fillText(event.choices[i].text, 10, 156 + 12 * i);
             }
         }
 	</script>
