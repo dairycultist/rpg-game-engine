@@ -100,6 +100,7 @@
         };
 
         let moving_north = false, moving_east = false, moving_south = false, moving_west = false;
+        let player_direction = "s";
 
         let anim_t = 0;
 
@@ -135,7 +136,7 @@
                 render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
             }
 
-            const player_anim = gamedata.player_map_sprites.n_idle;
+            const player_anim = gamedata.player_map_sprites[player_direction + "_idle"];
             const player_image = gamedata.sprites[player_anim[Math.floor(anim_t / 15.0) % player_anim.length]];
 
             render.drawImage(
@@ -147,10 +148,27 @@
             if (gamedata.state.event_queue.length == 0) {
 
                 // an empty event queue means we're in "map navigation" mode
-                if (moving_north != moving_south)
-                    gamedata.state.player_y += moving_north ? -0.05 : 0.05;
-                if (moving_east != moving_west)
-                    gamedata.state.player_x += moving_west ? -0.05 : 0.05;
+                if (moving_west != moving_east) {
+
+                    if (moving_west) {
+                        player_direction = "w";
+                        gamedata.state.player_x -= 0.05;
+                    } else {
+                        player_direction = "e";
+                        gamedata.state.player_x += 0.05;
+                    }
+                }
+
+                if (moving_north != moving_south) {
+
+                    if (moving_north) {
+                        player_direction = "n";
+                        gamedata.state.player_y -= 0.05;
+                    } else {
+                        player_direction = "s";
+                        gamedata.state.player_y += 0.05;
+                    }
+                }
 
             } else {
 
