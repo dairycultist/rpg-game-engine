@@ -99,6 +99,8 @@
             }
         };
 
+        let moving_north = false, moving_east = false, moving_south = false, moving_west = false;
+
         let anim_t = 0;
 
 		let render;
@@ -115,6 +117,7 @@
             setInterval(update, 1000 / 60);
 
 			document.addEventListener("keydown", onKeyDown);
+            document.addEventListener("keyup", onKeyUp);
 		}
 
         function update() {
@@ -144,6 +147,10 @@
             if (gamedata.state.event_queue.length == 0) {
 
                 // an empty event queue means we're in "map navigation" mode
+                if (moving_north != moving_south)
+                    gamedata.state.player_y += moving_north ? -0.05 : 0.05;
+                if (moving_east != moving_west)
+                    gamedata.state.player_x += moving_west ? -0.05 : 0.05;
 
             } else {
 
@@ -159,9 +166,29 @@
             anim_t++;
         }
 
+        function onKeyUp(keyevent) {
+
+            switch (keyevent.key) {
+                case "ArrowUp": moving_north = false; break;
+                case "ArrowRight": moving_east = false; break;
+                case "ArrowDown": moving_south = false; break;
+                case "ArrowLeft": moving_west = false; break;
+            }
+        }
+
         function onKeyDown(keyevent) {
 
-            if (gamedata.state.event_queue.length != 0) {
+            if (gamedata.state.event_queue.length == 0) {
+
+                // an empty event queue means we're in "map navigation" mode
+                switch (keyevent.key) {
+                    case "ArrowUp": moving_north = true; break;
+                    case "ArrowRight": moving_east = true; break;
+                    case "ArrowDown": moving_south = true; break;
+                    case "ArrowLeft": moving_west = true; break;
+                }
+
+            } else {
 
                 const curr_event = gamedata.state.event_queue[0];
 
