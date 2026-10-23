@@ -132,7 +132,8 @@
                 render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
             }
 
-            const player_image = gamedata.sprites[gamedata.player_map_sprites.n_idle[0]];
+            const player_anim = gamedata.player_map_sprites.n_idle;
+            const player_image = gamedata.sprites[player_anim[Math.floor(anim_t / 15.0) % player_anim.length]];
 
             render.drawImage(
                 player_image,
@@ -154,6 +155,8 @@
                     drawChoice(event);
                 }
             }
+
+            anim_t++;
         }
 
         function onKeyDown(keyevent) {
