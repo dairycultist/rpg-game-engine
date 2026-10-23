@@ -153,9 +153,13 @@
                     if (moving_west) {
                         player_direction = "w";
                         gamedata.state.player_x -= 0.05;
+                        if (playerColliding(0, 0) || playerColliding(0, 7))
+                            gamedata.state.player_x = Math.ceil(gamedata.state.player_x);
                     } else {
                         player_direction = "e";
                         gamedata.state.player_x += 0.05;
+                        if (playerColliding(15, 0) || playerColliding(15, 7))
+                            gamedata.state.player_x = Math.floor(gamedata.state.player_x);
                     }
                 }
 
@@ -164,9 +168,13 @@
                     if (moving_north) {
                         player_direction = "n";
                         gamedata.state.player_y -= 0.05;
+                        if (playerColliding(0, 0) || playerColliding(15, 0))
+                            gamedata.state.player_y = Math.ceil(gamedata.state.player_y);
                     } else {
                         player_direction = "s";
                         gamedata.state.player_y += 0.05;
+                        if (playerColliding(0, 7) || playerColliding(15, 7))
+                            gamedata.state.player_y = Math.floor(gamedata.state.player_y) + 0.5;
                     }
                 }
 
@@ -182,6 +190,10 @@
             }
 
             anim_t++;
+        }
+
+        function playerColliding(pixelOff_x, pixelOff_y) {
+            return gamedata.tiles[gamedata.rooms[gamedata.state.curr_room].tile_data[Math.floor(gamedata.state.player_x + pixelOff_x / 16.0) + Math.floor(gamedata.state.player_y + pixelOff_y / 16.0) * 16]].collidable;
         }
 
         function onKeyUp(keyevent) {
