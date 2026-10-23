@@ -29,9 +29,12 @@
             "sprite": "jake.png"
         }
     },
+    "tiles": [
+        { "sprite": "", "collidable": true }
+    ],
     "rooms": {
         "bedroom": {
-            "tile_data": "20,0,10,7,6,6,3,6,2,...",
+            "tile_data": [20,0,10,7,6,6,3,-1,6,2],
             "interactables": [
                 {
                     "place_condition": "!talked_to_friend",

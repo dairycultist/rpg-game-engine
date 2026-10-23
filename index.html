@@ -24,6 +24,7 @@
                 }
             },
             "state": {
+                "curr_room": "test",
                 "event_queue": [
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "left", "text": "Hi Mary!" },
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "Hi John!" },
@@ -60,7 +61,31 @@
                 ]
             },
             "sprites": {
-                "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg": ""
+                "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg": null,
+                "floor.png": null,
+                "wall.png": null
+            },
+            "tiles": [
+                { "sprite": "wall.png", "collidable": true },
+                { "sprite": "floor.png", "collidable": false }
+            ],
+            "rooms": {
+                "test": {
+                    "tile_data": [
+                        -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                        -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                        -1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1,
+                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
+                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
+                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
+                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
+                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
+                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
+                        -1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1,
+                        -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                        -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                    ]
+                }
             }
         };
 
@@ -86,6 +111,15 @@
             render.fillStyle = "black";
             render.fillRect(0, 0, 256, 192);
 
+            // temp, draw the map
+            const tile_data = gamedata.rooms[gamedata.state.curr_room].tile_data;
+
+            for (let i = 0; i < 16 * 12; i++) {
+                if (tile_data[i] == -1)
+                    continue;
+                render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
+            }
+
             if (gamedata.state.event_queue.length == 0) {
 
                 // an empty event queue means we're in "map navigation" mode
@@ -104,30 +138,33 @@
 
         function onKeyDown(keyevent) {
 
-            const curr_event = gamedata.state.event_queue[0];
+            if (gamedata.state.event_queue.length != 0) {
 
-            if (curr_event.type == "choice") {
+                const curr_event = gamedata.state.event_queue[0];
 
-                if (keyevent.key == "ArrowUp") {
-                    
-                    curr_event.selected_i--;
+                if (curr_event.type == "choice") {
 
-                    if (curr_event.selected_i < 0)
-                        curr_event.selected_i = curr_event.choices.length - 1;
+                    if (keyevent.key == "ArrowUp") {
+                        
+                        curr_event.selected_i--;
+
+                        if (curr_event.selected_i < 0)
+                            curr_event.selected_i = curr_event.choices.length - 1;
+                    }
+
+                    if (keyevent.key == "ArrowDown") {
+                        
+                        curr_event.selected_i++;
+
+                        if (curr_event.selected_i >= curr_event.choices.length)
+                            curr_event.selected_i = 0;
+                    }
                 }
+                
+                if (keyevent.key === ' ') {
 
-                if (keyevent.key == "ArrowDown") {
-                    
-                    curr_event.selected_i++;
-
-                    if (curr_event.selected_i >= curr_event.choices.length)
-                        curr_event.selected_i = 0;
+                    progressEventQueue();
                 }
-            }
-            
-            if (keyevent.key === ' ' && gamedata.state.event_queue.length != 0) {
-
-                progressEventQueue();
             }
         }
 
