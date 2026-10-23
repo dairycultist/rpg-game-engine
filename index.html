@@ -6,9 +6,6 @@
 	<script>
 
         const gamedata = {
-            "player_x": 5.0,
-            "player_y": 8.0,
-            "flags": [],
             "characters": {
                 "john": {
                     "display_name": "John",
@@ -25,6 +22,9 @@
             },
             "state": {
                 "curr_room": "test",
+                "player_x": 5.0,
+                "player_y": 8.0,
+                "flags": [],
                 "event_queue": [
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "left", "text": "Hi Mary!" },
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "Hi John!" },
@@ -196,8 +196,8 @@
 
                 } else if (event.type == "set_flag") {
 
-                    if (!gamedata.flags.includes(event.flag))
-                        gamedata.flags.push(event.flag);
+                    if (!gamedata.state.flags.includes(event.flag))
+                        gamedata.state.flags.push(event.flag);
 
                 } else if (event.type == "if") {
 
@@ -216,7 +216,7 @@
 
             if (condition.type == "flag") {
 
-                return gamedata.flags.includes(condition.value);
+                return gamedata.state.flags.includes(condition.value);
 
             } else {
 
