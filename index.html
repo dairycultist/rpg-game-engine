@@ -87,8 +87,8 @@
                         -1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1,
                         -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
                         -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
-                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
-                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
+                        -1,-1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0,-1,-1,
+                        -1,-1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0,-1,-1,
                         -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
                         -1,-1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,-1,-1,
                         -1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1,
@@ -151,30 +151,34 @@
                 if (moving_west != moving_east) {
 
                     if (moving_west) {
-                        player_direction = "w";
                         gamedata.state.player_x -= 0.05;
                         if (playerColliding(0, 0) || playerColliding(0, 7))
                             gamedata.state.player_x = Math.ceil(gamedata.state.player_x);
+                        else
+                            player_direction = "w";
                     } else {
-                        player_direction = "e";
                         gamedata.state.player_x += 0.05;
                         if (playerColliding(15, 0) || playerColliding(15, 7))
                             gamedata.state.player_x = Math.floor(gamedata.state.player_x);
+                        else
+                            player_direction = "e";
                     }
                 }
 
                 if (moving_north != moving_south) {
 
                     if (moving_north) {
-                        player_direction = "n";
                         gamedata.state.player_y -= 0.05;
                         if (playerColliding(0, 0) || playerColliding(15, 0))
                             gamedata.state.player_y = Math.ceil(gamedata.state.player_y);
+                        else
+                            player_direction = "n";
                     } else {
-                        player_direction = "s";
                         gamedata.state.player_y += 0.05;
                         if (playerColliding(0, 7) || playerColliding(15, 7))
-                            gamedata.state.player_y = Math.floor(gamedata.state.player_y) + 0.5;
+                            gamedata.state.player_y = Math.ceil(gamedata.state.player_y) - 0.48;
+                        else
+                            player_direction = "s";
                     }
                 }
 
