@@ -10,10 +10,10 @@
         ]
     },
     "player_map_sprites": {
-        "N": "player_north.png",
-        "E": "player_east.png",
-        "S": "player_south.png",
-        "W": "player_west.png"
+        "n_idle": [ "player_north.png" ],
+        "e_idle": [ "player_east.png" ],
+        "s_idle": [ "player_south.png" ],
+        "w_idle": [ "player_west.png" ]
     },
     "characters": {
         "player": {

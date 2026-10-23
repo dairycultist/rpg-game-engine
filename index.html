@@ -20,10 +20,16 @@
                     }
                 }
             },
+            "player_map_sprites": {
+                "n_idle": [ "player_north.png" ],
+                "e_idle": [ "player_east.png" ],
+                "s_idle": [ "player_south.png" ],
+                "w_idle": [ "player_west.png" ]
+            },
             "state": {
                 "curr_room": "test",
-                "player_x": 5.0,
-                "player_y": 8.0,
+                "player_x": 3.0,
+                "player_y": 3.0,
                 "flags": [],
                 "event_queue": [
                     { "type": "dialogue", "left": "john", "right": "mary", "speaker": "left", "text": "Hi Mary!" },
@@ -63,7 +69,11 @@
             "sprites": {
                 "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg": null,
                 "floor.png": null,
-                "wall.png": null
+                "wall.png": null,
+                "player_north.png": null,
+                "player_east.png": null,
+                "player_south.png": null,
+                "player_west.png": null
             },
             "tiles": [
                 { "sprite": "wall.png", "collidable": true },
@@ -88,6 +98,8 @@
                 }
             }
         };
+
+        let anim_t = 0;
 
 		let render;
 
@@ -119,6 +131,14 @@
                     continue;
                 render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
             }
+
+            const player_image = gamedata.sprites[gamedata.player_map_sprites.n_idle[0]];
+
+            render.drawImage(
+                player_image,
+                Math.floor(gamedata.state.player_x * 16.0 - player_image.width / 2.0) + 8,
+                Math.floor(gamedata.state.player_y * 16.0) - player_image.height + 8
+            );
 
             if (gamedata.state.event_queue.length == 0) {
 
