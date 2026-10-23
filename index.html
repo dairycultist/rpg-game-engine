@@ -34,28 +34,28 @@
                             {
                                 "text": "Eat an apple",
                                 "event_queue": [
-                                    { "type": "dialogue", "left": "john", "right": "mary", "text": "You picked eat an apple!" },
+                                    { "type": "dialogue", "text": "You picked eat an apple!" },
                                     { "type": "set_flag", "flag": "ate_apple" }
                                 ]
                             },
                             {
                                 "text": "Eat an orange",
                                 "event_queue": [
-                                    { "type": "dialogue", "left": "john", "right": "mary", "text": "You picked eat an orange..." },
-                                    { "type": "dialogue", "left": "john", "right": "mary", "text": "I don't like oranges..." }
+                                    { "type": "dialogue", "text": "You picked eat an orange..." },
+                                    { "type": "dialogue", "text": "I don't like oranges..." }
                                 ]
                             },
                         ]
                     },
-                    { "type": "dialogue", "left": "john", "right": "mary", "text": "And then a meteor hit the planet..." },
+                    { "type": "dialogue", "text": "And then a meteor hit the planet..." },
                     {
                         "type": "if",
                         "condition": { "type": "flag", "value": "ate_apple" }, // we'll store more complex conditions as an AST
                         "event_queue_on_true": [
-                            { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "At least you got to eat an apple!" }
+                            { "type": "dialogue", "right": "mary", "speaker": "right", "text": "At least you got to eat an apple!" }
                         ],
                         "event_queue_on_false": [
-                            { "type": "dialogue", "left": "john", "right": "mary", "speaker": "right", "text": "It's because you ate that orange..." }
+                            { "type": "dialogue", "right": "mary", "speaker": "right", "text": "It's because you ate that orange..." }
                         ]
                     },
                 ]
@@ -248,7 +248,7 @@
                 render.save();
                 render.translate(256, 0);
                 render.scale(-1, 1);
-                const image = gamedata.sprites[gamedata.characters[event.left].talk_sprites["DEFAULT"]];
+                const image = gamedata.sprites[gamedata.characters[event.right].talk_sprites["DEFAULT"]];
                 render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
                 render.restore();
             }
