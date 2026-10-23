@@ -24,7 +24,11 @@
                 "n_idle": [ "player_north.png" ],
                 "e_idle": [ "player_east.png" ],
                 "s_idle": [ "player_south.png" ],
-                "w_idle": [ "player_west.png" ]
+                "w_idle": [ "player_west.png" ],
+                "n_walk": [ "player_north.png", "player_north_walk1.png", "player_north.png", "player_north_walk2.png" ],
+                "e_walk": [ "player_east.png", "player_east_walk.png" ],
+                "s_walk": [ "player_south.png", "player_south_walk1.png", "player_south.png", "player_south_walk2.png" ],
+                "w_walk": [ "player_west.png", "player_west_walk.png" ],
             },
             "state": {
                 "curr_room": "test",
@@ -80,7 +84,13 @@
                 "player_north.png": null,
                 "player_east.png": null,
                 "player_south.png": null,
-                "player_west.png": null
+                "player_west.png": null,
+                "player_north_walk1.png": null,
+                "player_north_walk2.png": null,
+                "player_east_walk.png": null,
+                "player_south_walk1.png": null,
+                "player_south_walk2.png": null,
+                "player_west_walk.png": null
             },
             "tiles": [
                 { "sprite": "wall_top.png", "collidable": true },
@@ -115,6 +125,7 @@
 
         let moving_north = false, moving_east = false, moving_south = false, moving_west = false;
         let player_direction = "s";
+        let player_anim_state = "idle";
 
         let anim_t = 0;
 
@@ -150,7 +161,7 @@
                 render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
             }
 
-            const player_anim = gamedata.player_map_sprites[player_direction + "_idle"];
+            const player_anim = gamedata.player_map_sprites[player_direction + "_" + player_anim_state];
             const player_image = gamedata.sprites[player_anim[Math.floor(anim_t / 15.0) % player_anim.length]];
 
             render.drawImage(
@@ -159,6 +170,8 @@
                 Math.floor(gamedata.state.player_y * 16.0) - player_image.height + 8
             );
 
+            player_anim_state = "idle";
+
             if (gamedata.state.event_queue.length == 0) {
 
                 // an empty event queue means we're in "map navigation" mode
@@ -166,16 +179,20 @@
 
                     if (moving_west) {
                         gamedata.state.player_x -= 0.05;
-                        if (playerColliding(0, 0) || playerColliding(0, 7))
+                        if (playerColliding(0, 0) || playerColliding(0, 7)) {
                             gamedata.state.player_x = Math.ceil(gamedata.state.player_x);
-                        else
+                        } else {
                             player_direction = "w";
+                            player_anim_state = "walk";
+                        }
                     } else {
                         gamedata.state.player_x += 0.05;
-                        if (playerColliding(15, 0) || playerColliding(15, 7))
+                        if (playerColliding(15, 0) || playerColliding(15, 7)) {
                             gamedata.state.player_x = Math.floor(gamedata.state.player_x);
-                        else
+                        } else {
                             player_direction = "e";
+                            player_anim_state = "walk";
+                        }
                     }
                 }
 
@@ -183,16 +200,20 @@
 
                     if (moving_north) {
                         gamedata.state.player_y -= 0.05;
-                        if (playerColliding(0, 0) || playerColliding(15, 0))
+                        if (playerColliding(0, 0) || playerColliding(15, 0)) {
                             gamedata.state.player_y = Math.ceil(gamedata.state.player_y);
-                        else
+                        } else {
                             player_direction = "n";
+                            player_anim_state = "walk";
+                        }
                     } else {
                         gamedata.state.player_y += 0.05;
-                        if (playerColliding(0, 7) || playerColliding(15, 7))
+                        if (playerColliding(0, 7) || playerColliding(15, 7)) {
                             gamedata.state.player_y = Math.ceil(gamedata.state.player_y) - 0.48;
-                        else
+                        } else {
                             player_direction = "s";
+                            player_anim_state = "walk";
+                        }
                     }
                 }
 
