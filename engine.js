@@ -4,6 +4,7 @@ let player_anim_state = "idle";
 let curr_room = "test";
 let player_x = 3.0;
 let player_y = 3.0;
+let party = gamedata.initial_party;
 
 const global_procvars = {};
 
@@ -216,7 +217,7 @@ function drawMap() {
         render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
     }
 
-    const player_anim = gamedata.player_map_sprites[player_direction + "_" + player_anim_state];
+    const player_anim = gamedata.characters[party[0]].map_sprites[player_direction + "_" + player_anim_state];
     const player_image = gamedata.sprites[player_anim[Math.floor(anim_t / 15.0) % player_anim.length]];
 
     render.drawImage(

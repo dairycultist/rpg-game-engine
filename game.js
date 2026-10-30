@@ -1,9 +1,20 @@
 const gamedata = {
+    initial_party: [ "player" ],
     characters: {
         player: {
             display_name: "John",
             talk_sprites: {
                 DEFAULT: "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg"
+            },
+            map_sprites: {
+                n_idle: [ "player_north.png" ],
+                e_idle: [ "player_east.png" ],
+                s_idle: [ "player_south.png" ],
+                w_idle: [ "player_west.png" ],
+                n_walk: [ "player_north.png", "player_north_walk1.png", "player_north.png", "player_north_walk2.png" ],
+                e_walk: [ "player_east.png", "player_east_walk.png" ],
+                s_walk: [ "player_south.png", "player_south_walk1.png", "player_south.png", "player_south_walk2.png" ],
+                w_walk: [ "player_west.png", "player_west_walk.png" ],
             }
         },
         mary: {
@@ -12,16 +23,6 @@ const gamedata = {
                 DEFAULT: "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg"
             }
         }
-    },
-    player_map_sprites: {
-        n_idle: [ "player_north.png" ],
-        e_idle: [ "player_east.png" ],
-        s_idle: [ "player_south.png" ],
-        w_idle: [ "player_west.png" ],
-        n_walk: [ "player_north.png", "player_north_walk1.png", "player_north.png", "player_north_walk2.png" ],
-        e_walk: [ "player_east.png", "player_east_walk.png" ],
-        s_walk: [ "player_south.png", "player_south_walk1.png", "player_south.png", "player_south_walk2.png" ],
-        w_walk: [ "player_west.png", "player_west_walk.png" ],
     },
     sprites: {
         "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg": null,
