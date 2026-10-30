@@ -1,6 +1,10 @@
 let player_direction = "s";
 let player_anim_state = "idle";
 
+let curr_room = "test";
+let player_x = 3.0;
+let player_y = 3.0;
+
 const global_procvars = {};
 
 const state = {
@@ -16,18 +20,20 @@ const input = {
 };
 
 /*
-Whenever an action happens, it can add a "procedure" to this list.
-
-Procedures have three methods:
-  init: Run when the procedure is first added
-  frame: Run every frame; if this returns true, the procedure is destroyed (removed from the list)
-  destroy: Run when the procedure is destroyed
-
-Each function gets the arguments:
-  GLOBAL: An object representing variables all procedures have access to
-  LOCAL: An object representing variables only this procedure has access to -- not automatically cleared when the procedure is destroyed
-  input: Inputs happening on the frame that the function is running
-  state: Info on whether or not the player can move in the map, the actors currently in the room, etc
+ * Whenever an action happens, it can add a "procedure" to this list.
+ * Actions can be entering a room, interacting with an agent, moving, whatever.
+ * 
+ * Procedures have three methods:
+ *   init: Run when the procedure is first added
+ *   frame: Run every frame; if this returns true, the procedure is destroyed (removed from the list)
+ *   destroy: Run when the procedure is destroyed
+ * 
+ * Each function gets the arguments:
+ *   GLOBAL: An object representing variables all procedures have access to
+ *   LOCAL: An object representing variables only this procedure has access to -- not automatically cleared when the procedure is destroyed
+ *   input: Inputs happening on the frame that the function is running
+ *   state: Info on whether or not the player can move in the map, the actors currently in the room, etc
+ *   func: An object containing every auxilliary function accessible to a procedure (for drawing, changing rooms, etc).
 */
 let procedures = [];
 
@@ -36,30 +42,26 @@ let anim_t = 0;
 let render;
 
 addProcedure({
-    init: (GLOBAL, LOCAL, input, state) => {
+    init(GLOBAL, LOCAL, input, state, func) {
 
         state.can_move_in_map = false;
         LOCAL.i = 0;
     },
-    frame: (GLOBAL, LOCAL, input, state) => {
+    frame(GLOBAL, LOCAL, input, state, func) {
 
         switch (LOCAL.i) {
-            case 0: drawDialogue("Hi"); break;
-            case 1: drawDialogue("im john"); break;
-            case 2: drawDialogue("I like potatoes"); break;
+            case 0: drawDialogue("Hi.", "john", null, "left"); break;
+            case 1: drawDialogue("I'm john.", "john", null, "left"); break;
+            case 2: drawDialogue("He seems scary...", "john", null, "none"); break;
         }
 
-        if (input.justUse) {
-
-            LOCAL.i++;
-
-            if (LOCAL.i == 3)
+        if (input.justUse)
+            if (++LOCAL.i == 3)
                 return true;
-        }
 
         return false;
     },
-    destroy: (GLOBAL, LOCAL, input, state) => {
+    destroy(GLOBAL, LOCAL, input, state, func) {
 
         state.can_move_in_map = true;
     }
@@ -99,17 +101,17 @@ function update() {
         if (input.left != input.right) {
 
             if (input.left) {
-                gamedata.state.player_x -= 0.05;
+                player_x -= 0.05;
                 if (playerColliding(0, 0) || playerColliding(0, 7)) {
-                    gamedata.state.player_x = Math.ceil(gamedata.state.player_x);
+                    player_x = Math.ceil(player_x);
                 } else {
                     player_direction = "w";
                     player_anim_state = "walk";
                 }
             } else {
-                gamedata.state.player_x += 0.05;
+                player_x += 0.05;
                 if (playerColliding(15, 0) || playerColliding(15, 7)) {
-                    gamedata.state.player_x = Math.floor(gamedata.state.player_x);
+                    player_x = Math.floor(player_x);
                 } else {
                     player_direction = "e";
                     player_anim_state = "walk";
@@ -120,17 +122,17 @@ function update() {
         if (input.up != input.down) {
 
             if (input.up) {
-                gamedata.state.player_y -= 0.05;
+                player_y -= 0.05;
                 if (playerColliding(0, 0) || playerColliding(15, 0)) {
-                    gamedata.state.player_y = Math.ceil(gamedata.state.player_y);
+                    player_y = Math.ceil(player_y);
                 } else {
                     player_direction = "n";
                     player_anim_state = "walk";
                 }
             } else {
-                gamedata.state.player_y += 0.05;
+                player_y += 0.05;
                 if (playerColliding(0, 7) || playerColliding(15, 7)) {
-                    gamedata.state.player_y = Math.ceil(gamedata.state.player_y) - 0.48;
+                    player_y = Math.ceil(player_y) - 0.48;
                 } else {
                     player_direction = "s";
                     player_anim_state = "walk";
@@ -164,7 +166,7 @@ function update() {
 
 function playerColliding(pixelOff_x, pixelOff_y) {
 
-    const i = gamedata.rooms[gamedata.state.curr_room].tile_data[Math.floor(gamedata.state.player_x + pixelOff_x / 16.0) + Math.floor(gamedata.state.player_y + pixelOff_y / 16.0) * 16];
+    const i = gamedata.rooms[curr_room].tile_data[Math.floor(player_x + pixelOff_x / 16.0) + Math.floor(player_y + pixelOff_y / 16.0) * 16];
 
     if (i < 0)
         return false;
@@ -195,7 +197,7 @@ function onKeyDown(keyevent) {
 
 function drawMap() {
 
-    const tile_data = gamedata.rooms[gamedata.state.curr_room].tile_data;
+    const tile_data = gamedata.rooms[curr_room].tile_data;
 
     for (let i = 0; i < 16 * 12; i++) {
         if (tile_data[i] == -1)
@@ -208,8 +210,8 @@ function drawMap() {
 
     render.drawImage(
         player_image,
-        Math.floor(gamedata.state.player_x * 16.0 - player_image.width / 2.0) + 8,
-        Math.floor(gamedata.state.player_y * 16.0) - player_image.height + 8
+        Math.floor(player_x * 16.0 - player_image.width / 2.0) + 8,
+        Math.floor(player_y * 16.0) - player_image.height + 8
     );
 }
 
