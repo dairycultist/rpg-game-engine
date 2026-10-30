@@ -91,9 +91,9 @@ const gamedata = {
                 frame(GLOBAL, LOCAL, input, state, func) {
 
                     switch (LOCAL.i) {
-                        case 0: drawDialogue("Wow.", "john", null, "left"); break;
-                        case 1: drawDialogue("What is this place?", "john", null, "left"); break;
-                        case 2: drawDialogue("You scratch ur nuts", "john", null, "left"); break;
+                        case 0: func.drawDialogue("Wow.", "john", null, "left"); break;
+                        case 1: func.drawDialogue("What is this place?", "john", null, "left"); break;
+                        case 2: func.drawDialogue("You scratch ur nuts", "john", null, "left"); break;
                     }
 
                     if (input.justUse)

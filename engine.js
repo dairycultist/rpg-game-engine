@@ -1,10 +1,10 @@
 let player_direction = "s";
 let player_anim_state = "idle";
 
-let player_x = gamedata.init.playerX;
-let player_y = gamedata.init.playerY;
+let player_x  = gamedata.init.playerX;
+let player_y  = gamedata.init.playerY;
 let curr_room = gamedata.init.room;
-let party = gamedata.init.party;
+let party     = gamedata.init.party;
 
 const global_procvars = {};
 
@@ -18,6 +18,11 @@ const input = {
     up: false,
     down: false,
     justUse: false
+};
+
+const func = {
+    drawDialogue,
+    drawChoice
 };
 
 // TODO add auxilliary function for adding, removing (errors on trying to remove sole member), and peeping party members
@@ -54,7 +59,7 @@ function addProcedure(procedure) {
     if (!procedure.local_procvars)
         procedure.local_procvars = {};
 
-    procedure.init(global_procvars, procedure.local_procvars, input, state);
+    procedure.init(global_procvars, procedure.local_procvars, input, state, func);
     procedures.push(procedure);
 }
 
@@ -143,9 +148,9 @@ function update() {
     // process all procedures
     for (let i = 0; i < procedures.length; i++) {
 
-        if (procedures[i].frame(global_procvars, procedures[i].local_procvars, input, state)) {
+        if (procedures[i].frame(global_procvars, procedures[i].local_procvars, input, state, func)) {
 
-            procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state);
+            procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
             procedures.splice(i--, 1);
         }
     }
