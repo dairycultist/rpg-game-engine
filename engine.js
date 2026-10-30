@@ -1,6 +1,8 @@
 let player_direction = "s";
 let player_anim_state = "idle";
 
+const global_procvars = {};
+
 const state = {
     can_move_in_map: true
 };
@@ -37,12 +39,25 @@ addProcedure({
     init: (GLOBAL, LOCAL, input, state) => {
 
         state.can_move_in_map = false;
+        LOCAL.i = 0;
     },
     frame: (GLOBAL, LOCAL, input, state) => {
 
-        drawDialogue("Hello");
+        switch (LOCAL.i) {
+            case 0: drawDialogue("Hi"); break;
+            case 1: drawDialogue("im john"); break;
+            case 2: drawDialogue("I like potatoes"); break;
+        }
 
-        return input.justUse;
+        if (input.justUse) {
+
+            LOCAL.i++;
+
+            if (LOCAL.i == 3)
+                return true;
+        }
+
+        return false;
     },
     destroy: (GLOBAL, LOCAL, input, state) => {
 
@@ -52,7 +67,10 @@ addProcedure({
 
 function addProcedure(procedure) {
 
-    procedure.init({}, {}, input, state);
+    if (!procedure.local_procvars)
+        procedure.local_procvars = {};
+
+    procedure.init(global_procvars, procedure.local_procvars, input, state);
     procedures.push(procedure);
 }
 
@@ -132,9 +150,9 @@ function update() {
     // process all procedures
     for (let i = 0; i < procedures.length; i++) {
 
-        if (procedures[i].frame({}, {}, input, state)) {
+        if (procedures[i].frame(global_procvars, procedures[i].local_procvars, input, state)) {
 
-            procedures[i].destroy({}, {}, input, state);
+            procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state);
             procedures.splice(i--, 1);
         }
     }
