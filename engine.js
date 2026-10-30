@@ -1,8 +1,11 @@
 let player_direction = "s";
 let player_anim_state = "idle";
-let can_move_in_map = true;
 
-let input = {
+const state = {
+    can_move_in_map: true
+};
+
+const input = {
     left: false,
     right: false,
     up: false,
@@ -10,25 +13,48 @@ let input = {
     justUse: false
 };
 
-// whenever an action happens, it adds its corresponding function call to this list
-// (if it exists). all the functions here return false if they want to stay in the
-// list for another frame, or true if they want to be removed.
-let procedures = [
-    {
-        init: () => {},
-        frame: (GLOBAL, LOCAL, input) => {
+/*
+Whenever an action happens, it can add a "procedure" to this list.
 
-            drawDialogue("Hello");
+Procedures have three methods:
+  init: Run when the procedure is first added
+  frame: Run every frame; if this returns true, the procedure is destroyed (removed from the list)
+  destroy: Run when the procedure is destroyed
 
-            return input.justUse;
-        },
-        destroy: () => {}
-    }
-];
+Each function gets the arguments:
+  GLOBAL: An object representing variables all procedures have access to
+  LOCAL: An object representing variables only this procedure has access to -- not automatically cleared when the procedure is destroyed
+  input: Inputs happening on the frame that the function is running
+  state: Info on whether or not the player can move in the map, the actors currently in the room, etc
+*/
+let procedures = [];
 
 let anim_t = 0;
 
 let render;
+
+addProcedure({
+    init: (GLOBAL, LOCAL, input, state) => {
+
+        state.can_move_in_map = false;
+    },
+    frame: (GLOBAL, LOCAL, input, state) => {
+
+        drawDialogue("Hello");
+
+        return input.justUse;
+    },
+    destroy: (GLOBAL, LOCAL, input, state) => {
+
+        state.can_move_in_map = true;
+    }
+});
+
+function addProcedure(procedure) {
+
+    procedure.init({}, {}, input, state);
+    procedures.push(procedure);
+}
 
 function start() {
 
@@ -50,7 +76,7 @@ function update() {
     // player movement in map
     player_anim_state = "idle";
 
-    if (can_move_in_map) {
+    if (state.can_move_in_map) {
 
         if (input.left != input.right) {
 
@@ -106,8 +132,11 @@ function update() {
     // process all procedures
     for (let i = 0; i < procedures.length; i++) {
 
-        if (procedures[i].frame({}, {}, input))
+        if (procedures[i].frame({}, {}, input, state)) {
+
+            procedures[i].destroy({}, {}, input, state);
             procedures.splice(i--, 1);
+        }
     }
 
     input.justUse = false;
