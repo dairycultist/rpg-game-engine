@@ -1,10 +1,10 @@
 let player_direction = "s";
 let player_anim_state = "idle";
 
-let curr_room = "test";
-let player_x = 3.0;
-let player_y = 3.0;
-let party = gamedata.initial_party;
+let player_x = gamedata.init.playerX;
+let player_y = gamedata.init.playerY;
+let curr_room = gamedata.init.room;
+let party = gamedata.init.party;
 
 const global_procvars = {};
 
@@ -19,6 +19,9 @@ const input = {
     down: false,
     justUse: false
 };
+
+// TODO add auxilliary function for adding, removing (errors on trying to remove sole member), and peeping party members
+// TODO add auxilliary function for changing rooms
 
 /*
  * Whenever an action happens, it can add a "procedure" to this list.
@@ -44,31 +47,7 @@ let render;
 
 let error = null;
 
-addProcedure({
-    init(GLOBAL, LOCAL, input, state, func) {
-
-        state.can_move_in_map = false;
-        LOCAL.i = 0;
-    },
-    frame(GLOBAL, LOCAL, input, state, func) {
-
-        switch (LOCAL.i) {
-            case 0: drawDialogue("Wow.", "player", null, "left"); break;
-            case 1: drawDialogue("What is this place?", "player", null, "left"); break;
-            case 2: drawDialogue("You scratch ur nuts", "player", null, "left"); break;
-        }
-
-        if (input.justUse)
-            if (++LOCAL.i == 3)
-                return true;
-
-        return false;
-    },
-    destroy(GLOBAL, LOCAL, input, state, func) {
-
-        state.can_move_in_map = true;
-    }
-});
+addProcedure(gamedata.rooms[curr_room].onEnter);
 
 function addProcedure(procedure) {
 

@@ -1,7 +1,12 @@
 const gamedata = {
-    initial_party: [ "player" ],
+    init: {
+        party: [ "john" ],
+        room: "test",
+        playerX: 3.0,
+        playerY: 3.0
+    },
     characters: {
-        player: {
+        john: {
             display_name: "John",
             talk_sprites: {
                 DEFAULT: "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg"
@@ -76,7 +81,32 @@ const gamedata = {
                 -1,-1, 3, 6, 6, 6, 6, 8,10, 7, 6, 6, 6, 5,-1,-1,
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-            ]
+            ],
+            onEnter: {
+                init(GLOBAL, LOCAL, input, state, func) {
+
+                    state.can_move_in_map = false;
+                    LOCAL.i = 0;
+                },
+                frame(GLOBAL, LOCAL, input, state, func) {
+
+                    switch (LOCAL.i) {
+                        case 0: drawDialogue("Wow.", "john", null, "left"); break;
+                        case 1: drawDialogue("What is this place?", "john", null, "left"); break;
+                        case 2: drawDialogue("You scratch ur nuts", "john", null, "left"); break;
+                    }
+
+                    if (input.justUse)
+                        if (++LOCAL.i == 3)
+                            return true;
+
+                    return false;
+                },
+                destroy(GLOBAL, LOCAL, input, state, func) {
+
+                    state.can_move_in_map = true;
+                }
+            }
         }
     }
 };
