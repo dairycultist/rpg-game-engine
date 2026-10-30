@@ -1,6 +1,6 @@
 const gamedata = {
     characters: {
-        john: {
+        player: {
             display_name: "John",
             talk_sprites: {
                 DEFAULT: "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg"

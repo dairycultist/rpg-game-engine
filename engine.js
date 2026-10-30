@@ -41,6 +41,8 @@ let anim_t = 0;
 
 let render;
 
+let error = null;
+
 addProcedure({
     init(GLOBAL, LOCAL, input, state, func) {
 
@@ -50,9 +52,9 @@ addProcedure({
     frame(GLOBAL, LOCAL, input, state, func) {
 
         switch (LOCAL.i) {
-            case 0: drawDialogue("Hi.", "john", null, "left"); break;
-            case 1: drawDialogue("I'm john.", "john", null, "left"); break;
-            case 2: drawDialogue("He seems scary...", "john", null, "none"); break;
+            case 0: drawDialogue("Wow.", "player", null, "left"); break;
+            case 1: drawDialogue("What is this place?", "player", null, "left"); break;
+            case 2: drawDialogue("You scratch ur nuts", "player", null, "left"); break;
         }
 
         if (input.justUse)
@@ -92,6 +94,15 @@ function start() {
 }
 
 function update() {
+
+    if (error) {
+
+        render.fillStyle = "red";
+        render.font = "12px monospace";
+        render.fillText(error, 0, 40);
+        error = " ";
+        return;
+    }
 
     // player movement in map
     player_anim_state = "idle";
@@ -220,6 +231,12 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     // draw characters
     if (leftCharacterID) {
 
+        if (!gamedata.characters[leftCharacterID]) {
+
+            error = `"${ leftCharacterID }" is not a valid character ID!`;
+            return;
+        }
+
         if (speaker == "left")
             render.filter = "none";
         else
@@ -230,6 +247,12 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     }
 
     if (rightCharacterID) {
+
+        if (!gamedata.characters[rightCharacterID]) {
+
+            error = `"${ rightCharacterID }" is not a valid character ID!`;
+            return;
+        }
 
         if (speaker == "right")
             render.filter = "none";
