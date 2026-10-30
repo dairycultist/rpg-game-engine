@@ -1,16 +1,29 @@
-let moving_north = false, moving_east = false, moving_south = false, moving_west = false;
 let player_direction = "s";
 let player_anim_state = "idle";
 let can_move_in_map = true;
 
+let input = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    justUse: false
+};
+
 // whenever an action happens, it adds its corresponding function call to this list
 // (if it exists). all the functions here return false if they want to stay in the
 // list for another frame, or true if they want to be removed.
-let action_functions = [
-    (GLOBAL, UNIQUIFIER, action_argument) => {
+let procedures = [
+    {
+        init: () => {},
+        frame: (GLOBAL, LOCAL, input) => {
 
-        return false;
-    };
+            drawDialogue("Hello");
+
+            return input.justUse;
+        },
+        destroy: () => {}
+    }
 ];
 
 let anim_t = 0;
@@ -34,35 +47,14 @@ function start() {
 
 function update() {
 
-    // clear
-    render.fillStyle = "black";
-    render.fillRect(0, 0, 256, 192);
-
-    // temp, draw the map
-    const tile_data = gamedata.rooms[gamedata.state.curr_room].tile_data;
-
-    for (let i = 0; i < 16 * 12; i++) {
-        if (tile_data[i] == -1)
-            continue;
-        render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
-    }
-
-    const player_anim = gamedata.player_map_sprites[player_direction + "_" + player_anim_state];
-    const player_image = gamedata.sprites[player_anim[Math.floor(anim_t / 15.0) % player_anim.length]];
-
-    render.drawImage(
-        player_image,
-        Math.floor(gamedata.state.player_x * 16.0 - player_image.width / 2.0) + 8,
-        Math.floor(gamedata.state.player_y * 16.0) - player_image.height + 8
-    );
-
+    // player movement in map
     player_anim_state = "idle";
 
     if (can_move_in_map) {
 
-        if (moving_west != moving_east) {
+        if (input.left != input.right) {
 
-            if (moving_west) {
+            if (input.left) {
                 gamedata.state.player_x -= 0.05;
                 if (playerColliding(0, 0) || playerColliding(0, 7)) {
                     gamedata.state.player_x = Math.ceil(gamedata.state.player_x);
@@ -81,9 +73,9 @@ function update() {
             }
         }
 
-        if (moving_north != moving_south) {
+        if (input.up != input.down) {
 
-            if (moving_north) {
+            if (input.up) {
                 gamedata.state.player_y -= 0.05;
                 if (playerColliding(0, 0) || playerColliding(15, 0)) {
                     gamedata.state.player_y = Math.ceil(gamedata.state.player_y);
@@ -104,6 +96,22 @@ function update() {
 
     }
 
+    // clear
+    render.fillStyle = "black";
+    render.fillRect(0, 0, 256, 192);
+
+    // draw the map
+    drawMap();
+
+    // process all procedures
+    for (let i = 0; i < procedures.length; i++) {
+
+        if (procedures[i].frame({}, {}, input))
+            procedures.splice(i--, 1);
+    }
+
+    input.justUse = false;
+
     anim_t++;
 }
 
@@ -120,73 +128,61 @@ function playerColliding(pixelOff_x, pixelOff_y) {
 function onKeyUp(keyevent) {
 
     switch (keyevent.key) {
-        case "ArrowUp": moving_north = false; break;
-        case "ArrowRight": moving_east = false; break;
-        case "ArrowDown": moving_south = false; break;
-        case "ArrowLeft": moving_west = false; break;
+        case "ArrowUp": input.up = false; break;
+        case "ArrowRight": input.right = false; break;
+        case "ArrowDown": input.down = false; break;
+        case "ArrowLeft": input.left = false; break;
     }
 }
 
 function onKeyDown(keyevent) {
 
-    if (can_move_in_map) {
-
-        // an empty event queue means we're in "map navigation" mode
         switch (keyevent.key) {
-            case "ArrowUp": moving_north = true; break;
-            case "ArrowRight": moving_east = true; break;
-            case "ArrowDown": moving_south = true; break;
-            case "ArrowLeft": moving_west = true; break;
+            case "ArrowUp": input.up = true; break;
+            case "ArrowRight": input.right = true; break;
+            case "ArrowDown": input.down = true; break;
+            case "ArrowLeft": input.left = true; break;
+            case " ": input.justUse = true; break;
         }
-
-    }
-    // else {
-
-    //     const curr_event = gamedata.state.event_queue[0];
-
-    //     if (curr_event.type == "choice") {
-
-    //         if (keyevent.key == "ArrowUp") {
-                
-    //             curr_event.selected_i--;
-
-    //             if (curr_event.selected_i < 0)
-    //                 curr_event.selected_i = curr_event.choices.length - 1;
-    //         }
-
-    //         if (keyevent.key == "ArrowDown") {
-                
-    //             curr_event.selected_i++;
-
-    //             if (curr_event.selected_i >= curr_event.choices.length)
-    //                 curr_event.selected_i = 0;
-    //         }
-    //     }
-        
-    //     if (keyevent.key === ' ') {
-
-    //         progressEventQueue();
-    //     }
-    // }
 }
 
-function drawDialogue(event) {
+function drawMap() {
+
+    const tile_data = gamedata.rooms[gamedata.state.curr_room].tile_data;
+
+    for (let i = 0; i < 16 * 12; i++) {
+        if (tile_data[i] == -1)
+            continue;
+        render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
+    }
+
+    const player_anim = gamedata.player_map_sprites[player_direction + "_" + player_anim_state];
+    const player_image = gamedata.sprites[player_anim[Math.floor(anim_t / 15.0) % player_anim.length]];
+
+    render.drawImage(
+        player_image,
+        Math.floor(gamedata.state.player_x * 16.0 - player_image.width / 2.0) + 8,
+        Math.floor(gamedata.state.player_y * 16.0) - player_image.height + 8
+    );
+}
+
+function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker = "none") {
 
     // draw characters
-    if (event.left) {
+    if (leftCharacterID) {
 
-        if (event.speaker == "left")
+        if (speaker == "left")
             render.filter = "none";
         else
             render.filter = "brightness(80%)";
 
-        const image = gamedata.sprites[gamedata.characters[event.left].talk_sprites["DEFAULT"]];
+        const image = gamedata.sprites[gamedata.characters[leftCharacterID].talk_sprites["DEFAULT"]];
         render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
     }
 
-    if (event.right) {
+    if (rightCharacterID) {
 
-        if (event.speaker == "right")
+        if (speaker == "right")
             render.filter = "none";
         else
             render.filter = "brightness(80%)";
@@ -194,7 +190,7 @@ function drawDialogue(event) {
         render.save();
         render.translate(256, 0);
         render.scale(-1, 1);
-        const image = gamedata.sprites[gamedata.characters[event.right].talk_sprites["DEFAULT"]];
+        const image = gamedata.sprites[gamedata.characters[rightCharacterID].talk_sprites["DEFAULT"]];
         render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
         render.restore();
     }
@@ -211,33 +207,33 @@ function drawDialogue(event) {
     render.strokeRect(4, 138, 248, 50);
 
     render.fillStyle = "white";
-    render.fillText(event.text, 10, 156);
+    render.fillText(text, 10, 156);
 
-    if (event.speaker == "left") {
+    if (speaker == "left") {
 
-        const nameplate_width = event.left.length * 5 + 20;
+        const nameplate_width = gamedata.characters[leftCharacterID].display_name.length * 5 + 20;
 
         render.fillStyle = "black";
         render.fillRect(4, 113, nameplate_width, 25);
         render.strokeRect(4, 113, nameplate_width, 25);
 
         render.fillStyle = "white";
-        render.fillText(gamedata.characters[event.left].display_name, 10, 130);
+        render.fillText(gamedata.characters[leftCharacterID].display_name, 10, 130);
 
-    } else if (event.speaker == "right") {
+    } else if (speaker == "right") {
 
-        const nameplate_width = event.right.length * 5 + 20;
+        const nameplate_width = gamedata.characters[rightCharacterID].display_name.length * 5 + 20;
 
         render.fillStyle = "black";
         render.fillRect(252 - nameplate_width, 113, nameplate_width, 25);
         render.strokeRect(252 - nameplate_width, 113, nameplate_width, 25);
 
         render.fillStyle = "white";
-        render.fillText(gamedata.characters[event.right].display_name, 258 - nameplate_width, 130);
+        render.fillText(gamedata.characters[rightCharacterID].display_name, 258 - nameplate_width, 130);
     }
 }
 
-function drawChoice(event) {
+function drawChoice(choices = ["a", "b"], selected_i = 0) {
 
     render.fillStyle = "black";
     render.lineWidth = "2";
@@ -247,9 +243,9 @@ function drawChoice(event) {
     render.fillRect(4, 138, 248, 50);
     render.strokeRect(4, 138, 248, 50);
 
-    for (let i = 0; i < event.choices.length; i++) {
+    for (let i = 0; i < choices.length; i++) {
 
-        render.fillStyle = i == event.selected_i ? "yellow" : "white";
-        render.fillText(event.choices[i].text, 10, 156 + 12 * i);
+        render.fillStyle = i == selected_i ? "yellow" : "white";
+        render.fillText(choices[i].text, 10, 156 + 12 * i);
     }
 }
