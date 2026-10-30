@@ -26,18 +26,19 @@ const func = {
 };
 
 // TODO add auxilliary function for adding, removing (errors on trying to remove sole member), and peeping party members
-// TODO add auxilliary function for changing rooms
+// TODO add auxilliary function for changing rooms (including where to place the player)
 
 /*
- * Whenever an action happens, it can add a "procedure" to this list.
+ * Whenever an action happens, it can trigger a procedure.
  * Actions can be entering a room, interacting with an agent, moving, whatever.
  * 
- * Procedures have three methods:
- *   init: Run when the procedure is first added
+ * Procedures have up to three methods:
+ *   init: Run when the procedure is triggered.
  *   frame: Run every frame; if this returns true, the procedure is destroyed (removed from the list)
- *   destroy: Run when the procedure is destroyed
+ *          A procedure is only added to the procedures list if it has this method.
+ *   destroy: Run when the procedure is destroyed (removed from the procedures list).
  * 
- * Each function gets the arguments:
+ * Each method gets the arguments:
  *   GLOBAL: An object representing variables all procedures have access to
  *   LOCAL: An object representing variables only this procedure has access to -- not automatically cleared when the procedure is destroyed
  *   input: Inputs happening on the frame that the function is running
@@ -60,7 +61,9 @@ function addProcedure(procedure) {
         procedure.local_procvars = {};
 
     procedure.init(global_procvars, procedure.local_procvars, input, state, func);
-    procedures.push(procedure);
+
+    if (procedure.frame)
+        procedures.push(procedure);
 }
 
 function start() {
@@ -150,7 +153,8 @@ function update() {
 
         if (procedures[i].frame(global_procvars, procedures[i].local_procvars, input, state, func)) {
 
-            procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
+            if (procedures[i].destroy)
+                procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
             procedures.splice(i--, 1);
         }
     }

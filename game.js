@@ -82,6 +82,9 @@ const gamedata = {
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
             ],
+            onPlayerEnterTile: {
+                run
+            },
             onEnter: {
                 init(GLOBAL, LOCAL, input, state, func) {
 
@@ -93,7 +96,7 @@ const gamedata = {
                     switch (LOCAL.i) {
                         case 0: func.drawDialogue("Wow.", "john", null, "left"); break;
                         case 1: func.drawDialogue("What is this place?", "john", null, "left"); break;
-                        case 2: func.drawDialogue("You scratch ur nuts", "john", null, "left"); break;
+                        case 2: func.drawDialogue("You scratch ur nuts", "john", null, "none"); break;
                     }
 
                     if (input.justUse)
