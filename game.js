@@ -2,8 +2,8 @@ const gamedata = {
     init: {
         party: [ "john" ],
         room: "test",
-        playerX: 3.0,
-        playerY: 3.0
+        playerX: 4.0,
+        playerY: 4.0
     },
     characters: {
         john: {
@@ -82,8 +82,27 @@ const gamedata = {
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
             ],
-            onPlayerEnterTile: {
-                run
+            onMapInteract: {
+                init(GLOBAL, LOCAL, input, state, func) {
+
+                    if (Math.floor(state.playerActor.x) == 12) {
+
+                        func.triggerProcedure({
+                            init(GLOBAL, LOCAL, input, state, func) {
+                                state.can_move_in_map = false;
+                            },
+                            frame(GLOBAL, LOCAL, input, state, func) {
+
+                                func.drawDialogue("This right wall sure is nice.");
+
+                                return input.continue;
+                            },
+                            destroy(GLOBAL, LOCAL, input, state, func) {
+                                state.can_move_in_map = true;
+                            }
+                        });
+                    }
+                }
             },
             onEnter: {
                 init(GLOBAL, LOCAL, input, state, func) {
@@ -99,7 +118,7 @@ const gamedata = {
                         case 2: func.drawDialogue("You scratch ur nuts", "john", null, "none"); break;
                     }
 
-                    if (input.justUse)
+                    if (input.continue)
                         if (++LOCAL.i == 3)
                             return true;
 

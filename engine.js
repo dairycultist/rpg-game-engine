@@ -1,26 +1,34 @@
-let player_direction = "s";
-let player_anim_state = "idle";
-
-let player_x  = gamedata.init.playerX;
-let player_y  = gamedata.init.playerY;
+/*
+ * room procedures: onEnter, onMapMove, onMapInteract
+ */
 let curr_room = gamedata.init.room;
 let party     = gamedata.init.party;
 
 const global_procvars = {};
 
 const state = {
-    can_move_in_map: true
+    can_move_in_map: true,
+    playerActor: {
+        // probably add an offsetX and offsetY for animation
+        x: gamedata.init.playerX,
+        y: gamedata.init.playerY,
+        direction: "s",
+        animState: "idle"
+    },
+    actors: []
 };
+state.actors.push(state.playerActor);
 
 const input = {
     left: false,
     right: false,
     up: false,
     down: false,
-    justUse: false
+    continue: false
 };
 
 const func = {
+    triggerProcedure,
     drawDialogue,
     drawChoice
 };
@@ -53,14 +61,16 @@ let render;
 
 let error = null;
 
-addProcedure(gamedata.rooms[curr_room].onEnter);
+if (gamedata.rooms[curr_room].onEnter)
+    triggerProcedure(gamedata.rooms[curr_room].onEnter);
 
-function addProcedure(procedure) {
+function triggerProcedure(procedure) {
 
     if (!procedure.local_procvars)
         procedure.local_procvars = {};
 
-    procedure.init(global_procvars, procedure.local_procvars, input, state, func);
+    if (procedure.init)
+        procedure.init(global_procvars, procedure.local_procvars, input, state, func);
 
     if (procedure.frame)
         procedures.push(procedure);
@@ -93,27 +103,27 @@ function update() {
     }
 
     // player movement in map
-    player_anim_state = "idle";
+    state.playerActor.animState = "idle";
 
     if (state.can_move_in_map) {
 
         if (input.left != input.right) {
 
             if (input.left) {
-                player_x -= 0.05;
+                state.playerActor.x -= 0.05;
                 if (playerColliding(0, 0) || playerColliding(0, 7)) {
-                    player_x = Math.ceil(player_x);
+                    state.playerActor.x = Math.ceil(state.playerActor.x) - 0.5;
                 } else {
-                    player_direction = "w";
-                    player_anim_state = "walk";
+                    state.playerActor.direction = "w";
+                    state.playerActor.animState = "walk";
                 }
             } else {
-                player_x += 0.05;
+                state.playerActor.x += 0.05;
                 if (playerColliding(15, 0) || playerColliding(15, 7)) {
-                    player_x = Math.floor(player_x);
+                    state.playerActor.x = Math.floor(state.playerActor.x) + 0.5;
                 } else {
-                    player_direction = "e";
-                    player_anim_state = "walk";
+                    state.playerActor.direction = "e";
+                    state.playerActor.animState = "walk";
                 }
             }
         }
@@ -121,24 +131,26 @@ function update() {
         if (input.up != input.down) {
 
             if (input.up) {
-                player_y -= 0.05;
+                state.playerActor.y -= 0.05;
                 if (playerColliding(0, 0) || playerColliding(15, 0)) {
-                    player_y = Math.ceil(player_y);
+                    state.playerActor.y = Math.ceil(state.playerActor.y) - 0.5;
                 } else {
-                    player_direction = "n";
-                    player_anim_state = "walk";
+                    state.playerActor.direction = "n";
+                    state.playerActor.animState = "walk";
                 }
             } else {
-                player_y += 0.05;
+                state.playerActor.y += 0.05;
                 if (playerColliding(0, 7) || playerColliding(15, 7)) {
-                    player_y = Math.ceil(player_y) - 0.48;
+                    state.playerActor.y = Math.ceil(state.playerActor.y) - 0.98;
                 } else {
-                    player_direction = "s";
-                    player_anim_state = "walk";
+                    state.playerActor.direction = "s";
+                    state.playerActor.animState = "walk";
                 }
             }
         }
 
+        if (gamedata.rooms[curr_room].onMapMove && (input.left || input.right || input.up || input.down))
+            triggerProcedure(gamedata.rooms[curr_room].onMapMove);
     }
 
     // clear
@@ -159,14 +171,14 @@ function update() {
         }
     }
 
-    input.justUse = false;
+    input.continue = false;
 
     anim_t++;
 }
 
 function playerColliding(pixelOff_x, pixelOff_y) {
 
-    const i = gamedata.rooms[curr_room].tile_data[Math.floor(player_x + pixelOff_x / 16.0) + Math.floor(player_y + pixelOff_y / 16.0) * 16];
+    const i = gamedata.rooms[curr_room].tile_data[Math.floor(state.playerActor.x - 0.5 + pixelOff_x / 16.0) + Math.floor(state.playerActor.y - 0.5 + pixelOff_y / 16.0) * 16];
 
     if (i < 0)
         return false;
@@ -191,7 +203,14 @@ function onKeyDown(keyevent) {
             case "ArrowRight": input.right = true; break;
             case "ArrowDown": input.down = true; break;
             case "ArrowLeft": input.left = true; break;
-            case " ": input.justUse = true; break;
+            case " ":
+                if (state.can_move_in_map) {
+                    if (gamedata.rooms[curr_room].onMapInteract)
+                        triggerProcedure(gamedata.rooms[curr_room].onMapInteract);
+                } else {
+                    input.continue = true;
+                }
+                break;
         }
 }
 
@@ -205,13 +224,13 @@ function drawMap() {
         render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
     }
 
-    const player_anim = gamedata.characters[party[0]].map_sprites[player_direction + "_" + player_anim_state];
+    const player_anim = gamedata.characters[party[0]].map_sprites[state.playerActor.direction + "_" + state.playerActor.animState];
     const player_image = gamedata.sprites[player_anim[Math.floor(anim_t / 15.0) % player_anim.length]];
 
     render.drawImage(
         player_image,
-        Math.floor(player_x * 16.0 - player_image.width / 2.0) + 8,
-        Math.floor(player_y * 16.0) - player_image.height + 8
+        Math.floor(state.playerActor.x * 16.0 - player_image.width / 2.0),
+        Math.floor(state.playerActor.y * 16.0) - player_image.height
     );
 }
 
