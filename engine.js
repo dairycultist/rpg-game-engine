@@ -1,8 +1,7 @@
-let curr_room;
-
 const global_procvars = {};
 
 const state = {
+    roomID: "",
     can_move_in_map: true,
     playerActor: {
         characterID: gamedata.init.playerCharacterID,
@@ -33,8 +32,8 @@ const func = {
     changeRoom
 };
 
-// TODO add auxilliary function for adding, removing (errors on trying to remove sole member), and peeping party members
-// TODO add auxilliary function for changing rooms (including where to place the player)
+// TODO add auxilliary function for adding + removing (errors on trying to remove sole member) partymembers (directly modifying the state.IDK variable is discouraged)
+// TODO add auxilliary function for changing rooms (including where to place the player) (directly modifying the state.room variable is discouraged)
 // TODO changing to a room should make a deep copy of its tile data so we can implement an aux function for setting tiles (all changes cleared when leaving!)
 // maybe I should just trust the programmer to not modify stuff that probably shouldn't be modified, like inputs, the party (without a setter), etc
 
@@ -50,13 +49,34 @@ changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
 function triggerProcedure(procedure) {
 
-    procedure.local_procvars = {};
+    if (procedure.frame)
+        procedure.local_procvars = {};
 
     if (procedure.init)
         procedure.init(global_procvars, procedure.local_procvars, input, state, func);
 
     if (procedure.frame)
         procedures.push(procedure);
+}
+
+function destroyProcedureAt(i) {
+
+    if (procedures[i].destroy)
+        procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
+    procedures[i].local_procvars = null;
+    procedures.splice(i--, 1);
+}
+
+function destroyAllProcedures() {
+
+    for (let i = 0; i < procedures.length; i++) {
+
+        if (procedures[i].destroy)
+            procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
+        procedures[i].local_procvars = null;
+    }
+
+    procedures = [];
 }
 
 function start() {
@@ -134,8 +154,8 @@ function update() {
             }
         }
 
-        if (gamedata.rooms[curr_room].onMapMove && (input.left || input.right || input.up || input.down))
-            triggerProcedure(gamedata.rooms[curr_room].onMapMove);
+        if (gamedata.rooms[state.roomID].onMapMove && (input.left || input.right || input.up || input.down))
+            triggerProcedure(gamedata.rooms[state.roomID].onMapMove);
     }
 
     // clear
@@ -148,13 +168,8 @@ function update() {
     // process all procedures
     for (let i = 0; i < procedures.length; i++) {
 
-        if (procedures[i].frame(global_procvars, procedures[i].local_procvars, input, state, func)) {
-
-            if (procedures[i].destroy)
-                procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
-            procedures[i].local_procvars = null;
-            procedures.splice(i--, 1);
-        }
+        if (procedures[i].frame(global_procvars, procedures[i].local_procvars, input, state, func))
+            destroyProcedureAt(i);
     }
 
     input.continue = false;
@@ -166,7 +181,7 @@ function update() {
 
 function playerColliding(pixelOff_x, pixelOff_y) {
 
-    const i = gamedata.rooms[curr_room].tile_data[Math.floor(state.playerActor.x - 0.5 + pixelOff_x / 16.0) + Math.floor(state.playerActor.y - 0.5 + pixelOff_y / 16.0) * 16];
+    const i = gamedata.rooms[state.roomID].tile_data[Math.floor(state.playerActor.x - 0.5 + pixelOff_x / 16.0) + Math.floor(state.playerActor.y - 0.5 + pixelOff_y / 16.0) * 16];
 
     if (i < 0)
         return false;
@@ -196,8 +211,8 @@ function onKeyDown(keyevent) {
 
                     // TODO first check if we're close enough to any actor to interact with THEM instead of just generically with the map
 
-                    if (gamedata.rooms[curr_room].onMapInteract)
-                        triggerProcedure(gamedata.rooms[curr_room].onMapInteract);
+                    if (gamedata.rooms[state.roomID].onMapInteract)
+                        triggerProcedure(gamedata.rooms[state.roomID].onMapInteract);
                 } else {
                     input.continue = true;
                 }
@@ -207,21 +222,26 @@ function onKeyDown(keyevent) {
 
 function changeRoom(roomID, newPlayerX, newPlayerY) {
 
-    // TODO destroy all active procedures
-    // TODO clear the actors array except for the player
+    // destroy all active procedures
+    destroyAllProcedures();
 
-    curr_room = roomID;
+    // clear the actors array except for the player
+    state.actors = [ state.playerActor ];
+
+    // change the room and move the player
+    state.roomID = roomID;
     state.playerActor.x = newPlayerX;
     state.playerActor.y = newPlayerY;
 
-    if (gamedata.rooms[curr_room].onEnter)
-        triggerProcedure(gamedata.rooms[curr_room].onEnter);
+    // trigger the room's onEnter procedure
+    if (gamedata.rooms[state.roomID].onEnter)
+        triggerProcedure(gamedata.rooms[state.roomID].onEnter);
 }
 
 function drawMap() {
 
     // draw room
-    const tile_data = gamedata.rooms[curr_room].tile_data;
+    const tile_data = gamedata.rooms[state.roomID].tile_data;
 
     for (let i = 0; i < 16 * 12; i++) {
         if (tile_data[i] == -1)
