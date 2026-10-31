@@ -2,16 +2,16 @@
  * room procedures: onEnter, onMapMove, onMapInteract
  */
 let curr_room;
-let party     = gamedata.init.party;
 
 const global_procvars = {};
 
 const state = {
     can_move_in_map: true,
     playerActor: {
-        // probably add an offsetX and offsetY for animation
+        characterID: gamedata.init.playerCharacterID,
         x: 0.0,
         y: 0.0,
+        // probably add an offsetX and offsetY for animation
         direction: "s",
         animState: "idle"
     },
@@ -229,6 +229,7 @@ function changeRoom(roomID, newPlayerX, newPlayerY) {
 
 function drawMap() {
 
+    // draw room
     const tile_data = gamedata.rooms[curr_room].tile_data;
 
     for (let i = 0; i < 16 * 12; i++) {
@@ -237,14 +238,19 @@ function drawMap() {
         render.drawImage(gamedata.sprites[gamedata.tiles[tile_data[i]].sprite], (i % 16) * 16, Math.floor(i / 16) * 16);
     }
 
-    const player_anim = gamedata.characters[party[0]].map_sprites[state.playerActor.direction + "_" + state.playerActor.animState];
-    const player_image = gamedata.sprites[player_anim[Math.floor(anim_t / 15.0) % player_anim.length]];
+    // draw all actors in order of y value
+    state.actors.sort((a, b) => a.y - b.y);
+    for (const actor of state.actors) {
 
-    render.drawImage(
-        player_image,
-        Math.floor(state.playerActor.x * 16.0 - player_image.width / 2.0),
-        Math.floor(state.playerActor.y * 16.0) - player_image.height
-    );
+        const anim = gamedata.characters[actor.characterID].map_sprites[actor.direction + "_" + actor.animState];
+        const image = gamedata.sprites[anim[Math.floor(anim_t / 15.0) % anim.length]];
+
+        render.drawImage(
+            image,
+            Math.floor(actor.x * 16.0 - image.width / 2.0),
+            Math.floor(actor.y * 16.0) - image.height
+        );
+    }
 }
 
 function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker = "none") {

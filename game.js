@@ -1,6 +1,6 @@
 const gamedata = {
     init: {
-        party: [ "john" ],
+        playerCharacterID: "john",
         room: "bedroom",
         playerX: 4.0,
         playerY: 4.0
