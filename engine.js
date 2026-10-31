@@ -352,7 +352,9 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     render.strokeRect(4, 138, 248, 50);
 
     render.fillStyle = "white";
-    render.fillText(text, 10, 156);
+    let i = 0;
+    for (const line of text.split("\n"))
+        render.fillText(line, 10, 156 + (i++) * 12);
 
     if (speaker == "left") {
 
