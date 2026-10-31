@@ -28,8 +28,7 @@ Procedures have up to three methods:
 
 Each method gets the arguments:
 - GLOBAL: An object representing variables all procedures have access to.
-- LOCAL: An object representing variables only this procedure has access to -- not automatically cleared when the procedure is destroyed.
-**TODO make LOCAL automatically cleared when the procedure is destroyed (to make saving easier down the road; just use GLOBAL for cross-room persistent stuff!)**
+- LOCAL: An object representing variables only this procedure has access to -- automatically cleared when the procedure is destroyed (to make saving easier down the road; just use GLOBAL for cross-room persistent stuff!).
 - input: Inputs happening on the frame that the function is running.
 - state: Info about the game state (whether or not the player can move in the map, the actors currently in the room, etc).
 - func: An object containing every auxilliary function accessible to a procedure (for drawing, changing rooms, etc).

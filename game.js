@@ -141,7 +141,7 @@ const gamedata = {
             onEnter: {
                 init(GLOBAL, LOCAL, input, state, func) {
 
-                    if (LOCAL.i)
+                    if (GLOBAL.didIntro)
                         return;
 
                     state.can_move_in_map = false;
@@ -170,6 +170,7 @@ const gamedata = {
                 destroy(GLOBAL, LOCAL, input, state, func) {
 
                     state.can_move_in_map = true;
+                    GLOBAL.didIntro = true;
                 }
             }
         }

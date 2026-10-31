@@ -50,8 +50,7 @@ changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
 function triggerProcedure(procedure) {
 
-    if (!procedure.local_procvars)
-        procedure.local_procvars = {};
+    procedure.local_procvars = {};
 
     if (procedure.init)
         procedure.init(global_procvars, procedure.local_procvars, input, state, func);
@@ -153,6 +152,7 @@ function update() {
 
             if (procedures[i].destroy)
                 procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
+            procedures[i].local_procvars = null;
             procedures.splice(i--, 1);
         }
     }
@@ -193,6 +193,9 @@ function onKeyDown(keyevent) {
             case "ArrowLeft": input.left = true; break;
             case " ":
                 if (state.can_move_in_map) {
+
+                    // TODO first check if we're close enough to any actor to interact with THEM instead of just generically with the map
+
                     if (gamedata.rooms[curr_room].onMapInteract)
                         triggerProcedure(gamedata.rooms[curr_room].onMapInteract);
                 } else {
