@@ -141,6 +141,13 @@ const gamedata = {
             onEnter: {
                 init(GLOBAL, LOCAL, input, state, func) {
 
+                    func.spawnActor("john", 10.0, 4.5).onInteract = {
+
+                        init(GLOBAL, LOCAL, input, state, func) {
+                            alert("penits");
+                        }
+                    };
+
                     if (GLOBAL.didIntro)
                         return;
 

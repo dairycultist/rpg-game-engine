@@ -34,3 +34,5 @@ Each method gets the arguments:
 - func: An object containing every auxilliary function accessible to a procedure (for drawing, changing rooms, etc).
 
 Room procedures: onEnter, onMapMove, onMapInteract
+
+Actor procedures (all of these have the actor object passed as "LOCAL.actor"): onInteract

@@ -27,6 +27,7 @@ const input = {
 
 const func = {
     triggerProcedure,
+    spawnActor,
     drawDialogue,
     drawChoice,
     changeRoom
@@ -46,38 +47,6 @@ let render;
 let error = null;
 
 changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
-
-function triggerProcedure(procedure) {
-
-    if (procedure.frame)
-        procedure.local_procvars = {};
-
-    if (procedure.init)
-        procedure.init(global_procvars, procedure.local_procvars, input, state, func);
-
-    if (procedure.frame)
-        procedures.push(procedure);
-}
-
-function destroyProcedureAt(i) {
-
-    if (procedures[i].destroy)
-        procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
-    procedures[i].local_procvars = null;
-    procedures.splice(i--, 1);
-}
-
-function destroyAllProcedures() {
-
-    for (let i = 0; i < procedures.length; i++) {
-
-        if (procedures[i].destroy)
-            procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
-        procedures[i].local_procvars = null;
-    }
-
-    procedures = [];
-}
 
 function start() {
 
@@ -209,8 +178,20 @@ function onKeyDown(keyevent) {
             case " ":
                 if (state.can_move_in_map) {
 
-                    // TODO first check if we're close enough to any actor to interact with THEM instead of just generically with the map
+                    // first check if we're close enough to any actor to interact with them
+                    for (const actor of state.actors) {
 
+                        if (actor == state.playerActor)
+                            continue;
+
+                        if (Math.abs(actor.x - state.playerActor.x) < 1.0 && Math.abs(actor.y - state.playerActor.y) < 1.0) {
+
+                            triggerProcedure(actor.onInteract, { actor });
+                            break;
+                        }
+                    }
+
+                    // just interact generically with the map
                     if (gamedata.rooms[state.roomID].onMapInteract)
                         triggerProcedure(gamedata.rooms[state.roomID].onMapInteract);
                 } else {
@@ -218,6 +199,53 @@ function onKeyDown(keyevent) {
                 }
                 break;
         }
+}
+
+function triggerProcedure(procedure, local_init = {}) {
+
+    if (procedure.frame)
+        procedure.local_procvars = local_init;
+
+    if (procedure.init)
+        procedure.init(global_procvars, procedure.local_procvars, input, state, func);
+
+    if (procedure.frame)
+        procedures.push(procedure);
+}
+
+function destroyProcedureAt(i) {
+
+    if (procedures[i].destroy)
+        procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
+    procedures[i].local_procvars = null;
+    procedures.splice(i--, 1);
+}
+
+function destroyAllProcedures() {
+
+    for (let i = 0; i < procedures.length; i++) {
+
+        if (procedures[i].destroy)
+            procedures[i].destroy(global_procvars, procedures[i].local_procvars, input, state, func);
+        procedures[i].local_procvars = null;
+    }
+
+    procedures = [];
+}
+
+function spawnActor(characterID, x, y) {
+
+    const actor = {
+        characterID,
+        x,
+        y,
+        direction: "s",
+        animState: "idle"
+    };
+
+    state.actors.push(actor);
+
+    return actor;
 }
 
 function changeRoom(roomID, newPlayerX, newPlayerY) {
