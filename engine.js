@@ -1,19 +1,11 @@
 const global_procvars = {};
 
 const state = {
-    roomID: "",
+    roomID: "", // directly modifying the state.roomID variable is discouraged
     can_move_in_map: true,
-    playerActor: {
-        characterID: gamedata.init.playerCharacterID,
-        x: 0.0,
-        y: 0.0,
-        // probably add an offsetX and offsetY for animation
-        direction: "s",
-        animState: "idle"
-    },
+    playerActor: null,
     actors: []
 };
-state.actors.push(state.playerActor);
 
 const input = {
     left: false,
@@ -28,14 +20,12 @@ const input = {
 const func = {
     triggerProcedure,
     spawnActor,
-    actorLookAt,
     drawDialogue,
     drawChoice,
     changeRoom
 };
 
 // TODO add auxilliary function for adding + removing (errors on trying to remove sole member) partymembers (directly modifying the state.IDK variable is discouraged)
-// TODO add auxilliary function for changing rooms (including where to place the player) (directly modifying the state.room variable is discouraged)
 // TODO changing to a room should make a deep copy of its tile data so we can implement an aux function for setting tiles (all changes cleared when leaving!)
 // maybe I should just trust the programmer to not modify stuff that probably shouldn't be modified, like inputs, the party (without a setter), etc
 
@@ -47,6 +37,8 @@ let render;
 
 let error = null;
 
+// initialize state
+state.playerActor = spawnActor(gamedata.init.playerCharacterID, 0.0, 0.0);
 changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
 function start() {
@@ -233,15 +225,15 @@ function destroyAllProcedures() {
     procedures = [];
 }
 
-function actorLookAt(fromActor, toActor) {
+function lookAt(toActor) {
 
-    let dx = toActor.x - fromActor.x;
-    let dy = toActor.y - fromActor.y;
+    let dx = toActor.x - this.x;
+    let dy = toActor.y - this.y;
 
     if (Math.abs(dy * 1.5) > Math.abs(dx)) {
-        fromActor.direction = dy > 0 ? "s" : "n";
+        this.direction = dy > 0 ? "s" : "n";
     } else {
-        fromActor.direction = dx > 0 ? "e" : "w";
+        this.direction = dx > 0 ? "e" : "w";
     }
 }
 
@@ -251,8 +243,11 @@ function spawnActor(characterID, x, y) {
         characterID,
         x,
         y,
+        // probably add an offsetX and offsetY for animation
         direction: "s",
-        animState: "idle"
+        animState: "idle",
+        // methods
+        lookAt
     };
 
     state.actors.push(actor);

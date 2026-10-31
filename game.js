@@ -146,9 +146,8 @@ const gamedata = {
                         init(GLOBAL, LOCAL, input, state, func) {
                             
                             state.can_move_in_map = false;
-                            func.actorLookAt(LOCAL.actor, state.playerActor);
-                            func.actorLookAt(state.playerActor, LOCAL.actor);
-
+                            LOCAL.actor.lookAt(state.playerActor);
+                            state.playerActor.lookAt(LOCAL.actor);
                             LOCAL.i = 0;
                         },
                         frame(GLOBAL, LOCAL, input, state, func) {
@@ -168,6 +167,7 @@ const gamedata = {
                         destroy(GLOBAL, LOCAL, input, state, func) {
 
                             state.can_move_in_map = true;
+                            LOCAL.actor.direction = "s";
                         }
                     };
 
