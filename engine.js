@@ -28,6 +28,7 @@ const input = {
 const func = {
     triggerProcedure,
     spawnActor,
+    actorLookAt,
     drawDialogue,
     drawChoice,
     changeRoom
@@ -184,7 +185,7 @@ function onKeyDown(keyevent) {
                         if (actor == state.playerActor)
                             continue;
 
-                        if (Math.abs(actor.x - state.playerActor.x) < 1.0 && Math.abs(actor.y - state.playerActor.y) < 1.0) {
+                        if (Math.abs(actor.x - state.playerActor.x) < 1.5 && Math.abs(actor.y - state.playerActor.y) < 1.5) {
 
                             triggerProcedure(actor.onInteract, { actor });
                             break;
@@ -203,8 +204,7 @@ function onKeyDown(keyevent) {
 
 function triggerProcedure(procedure, local_init = {}) {
 
-    if (procedure.frame)
-        procedure.local_procvars = local_init;
+    procedure.local_procvars = local_init;
 
     if (procedure.init)
         procedure.init(global_procvars, procedure.local_procvars, input, state, func);
@@ -231,6 +231,18 @@ function destroyAllProcedures() {
     }
 
     procedures = [];
+}
+
+function actorLookAt(fromActor, toActor) {
+
+    let dx = toActor.x - fromActor.x;
+    let dy = toActor.y - fromActor.y;
+
+    if (Math.abs(dy * 1.5) > Math.abs(dx)) {
+        fromActor.direction = dy > 0 ? "s" : "n";
+    } else {
+        fromActor.direction = dx > 0 ? "e" : "w";
+    }
 }
 
 function spawnActor(characterID, x, y) {

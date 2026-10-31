@@ -144,7 +144,30 @@ const gamedata = {
                     func.spawnActor("john", 10.0, 4.5).onInteract = {
 
                         init(GLOBAL, LOCAL, input, state, func) {
-                            alert("penits");
+                            
+                            state.can_move_in_map = false;
+                            func.actorLookAt(LOCAL.actor, state.playerActor);
+                            func.actorLookAt(state.playerActor, LOCAL.actor);
+
+                            LOCAL.i = 0;
+                        },
+                        frame(GLOBAL, LOCAL, input, state, func) {
+
+                            if (input.continue)
+                                LOCAL.i++
+
+                            switch (LOCAL.i) {
+                                case 0: func.drawDialogue("Another John?!", "john", "john", "left"); break;
+                                case 1: func.drawDialogue("Hi I'm John.", "john", "john", "right"); break;
+                                case 2: func.drawDialogue("zamn", "john", "john", "none"); break;
+                                default: return true;
+                            }
+
+                            return false;
+                        },
+                        destroy(GLOBAL, LOCAL, input, state, func) {
+
+                            state.can_move_in_map = true;
                         }
                     };
 
