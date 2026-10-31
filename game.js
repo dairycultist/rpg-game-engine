@@ -1,7 +1,7 @@
 const gamedata = {
     init: {
         party: [ "john" ],
-        room: "test",
+        room: "bedroom",
         playerX: 4.0,
         playerY: 4.0
     },
@@ -9,7 +9,7 @@ const gamedata = {
         john: {
             display_name: "John",
             talk_sprites: {
-                DEFAULT: "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg"
+                DEFAULT: "player_talksprite.png"
             },
             map_sprites: {
                 n_idle: [ "player_north.png" ],
@@ -25,12 +25,12 @@ const gamedata = {
         mary: {
             display_name: "Mary",
             talk_sprites: {
-                DEFAULT: "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg"
+                DEFAULT: "player_talksprite.png"
             }
         }
     },
     sprites: {
-        "https://i0.wp.com/maepolzine.com/wp-content/uploads/2017/01/5cc1b-img.jpg": null,
+        "player_talksprite.png": null,
         "floor.png": null,
         "wall_top.png": null,
         "wall_bottom.png": null,
@@ -63,11 +63,36 @@ const gamedata = {
         { sprite: "wall_bottom.png", collidable: true },
         { sprite: "wall_left_inner.png", collidable: true },
         { sprite: "wall_right_inner.png", collidable: true },
-        { sprite: "exit_top.png", collidable: true },
-        { sprite: "exit_bottom.png", collidable: true },
+        { sprite: "exit_top.png", collidable: false },
+        { sprite: "exit_bottom.png", collidable: false },
     ],
     rooms: {
-        test: {
+        closet: {
+            tile_data: [
+                -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1, 2, 0, 0, 4,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1, 2, 1, 1, 4,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1, 2, 1, 1, 4,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1, 3, 8,10, 4,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+            ],
+            onMapMove: {
+                init(GLOBAL, LOCAL, input, state, func) {
+
+                    if (Math.floor(state.playerActor.y) == 8) {
+
+                        func.changeRoom("bedroom", 5.5, 3.0);
+                    }
+                },
+            },
+        },
+        bedroom: {
             tile_data: [
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
@@ -78,7 +103,7 @@ const gamedata = {
                 -1,-1, 2, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 4,-1,-1,
                 -1,-1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4,-1,-1,
                 -1,-1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4,-1,-1,
-                -1,-1, 3, 6, 6, 6, 6, 8,10, 7, 6, 6, 6, 5,-1,-1,
+                -1,-1, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5,-1,-1,
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                 -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
             ],
@@ -104,23 +129,35 @@ const gamedata = {
                     }
                 }
             },
+            onMapMove: {
+                init(GLOBAL, LOCAL, input, state, func) {
+
+                    if (Math.floor(state.playerActor.y) == 2) {
+
+                        func.changeRoom("closet", 8.5, 7.5);
+                    }
+                },
+            },
             onEnter: {
                 init(GLOBAL, LOCAL, input, state, func) {
+
+                    if (LOCAL.i)
+                        return;
 
                     state.can_move_in_map = false;
                     LOCAL.i = 0;
                 },
                 frame(GLOBAL, LOCAL, input, state, func) {
 
+                    if (input.continue)
+                        LOCAL.i++
+
                     switch (LOCAL.i) {
                         case 0: func.drawDialogue("Wow.", "john", null, "left"); break;
                         case 1: func.drawDialogue("What is this place?", "john", null, "left"); break;
                         case 2: func.drawDialogue("You scratch ur nuts", "john", null, "none"); break;
+                        default: return true;
                     }
-
-                    if (input.continue)
-                        if (++LOCAL.i == 3)
-                            return true;
 
                     return false;
                 },

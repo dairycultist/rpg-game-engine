@@ -1,7 +1,7 @@
 /*
  * room procedures: onEnter, onMapMove, onMapInteract
  */
-let curr_room = gamedata.init.room;
+let curr_room;
 let party     = gamedata.init.party;
 
 const global_procvars = {};
@@ -10,8 +10,8 @@ const state = {
     can_move_in_map: true,
     playerActor: {
         // probably add an offsetX and offsetY for animation
-        x: gamedata.init.playerX,
-        y: gamedata.init.playerY,
+        x: 0.0,
+        y: 0.0,
         direction: "s",
         animState: "idle"
     },
@@ -30,7 +30,8 @@ const input = {
 const func = {
     triggerProcedure,
     drawDialogue,
-    drawChoice
+    drawChoice,
+    changeRoom
 };
 
 // TODO add auxilliary function for adding, removing (errors on trying to remove sole member), and peeping party members
@@ -61,8 +62,7 @@ let render;
 
 let error = null;
 
-if (gamedata.rooms[curr_room].onEnter)
-    triggerProcedure(gamedata.rooms[curr_room].onEnter);
+changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
 function triggerProcedure(procedure) {
 
@@ -212,6 +212,19 @@ function onKeyDown(keyevent) {
                 }
                 break;
         }
+}
+
+function changeRoom(roomID, newPlayerX, newPlayerY) {
+
+    // TODO im not sure what we should do with active procedures
+    // TODO also remember to clear the actors array except for the player
+
+    curr_room = roomID;
+    state.playerActor.x = newPlayerX;
+    state.playerActor.y = newPlayerY;
+
+    if (gamedata.rooms[curr_room].onEnter)
+        triggerProcedure(gamedata.rooms[curr_room].onEnter);
 }
 
 function drawMap() {
