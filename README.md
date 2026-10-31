@@ -15,3 +15,23 @@ I wanna tell stories! I wanna make worlds! I wanna flesh out unique characters a
 | Talk sprites | 128x128    |
 | Map tiles    | 16x16      |
 | Map sprites  | Any        |
+
+## Procedures
+
+Whenever an action happens, it can trigger a procedure. Actions can be entering a room, interacting with an agent, moving, whatever.
+
+Procedures have up to three methods:
+- init: Run when the procedure is triggered.
+- frame: Run every frame; if this returns true, the procedure is destroyed (removed from the list).
+  A procedure is only added to the procedures list if it has this method.
+- destroy: Run when the procedure is destroyed (removed from the procedures list).
+
+Each method gets the arguments:
+- GLOBAL: An object representing variables all procedures have access to.
+- LOCAL: An object representing variables only this procedure has access to -- not automatically cleared when the procedure is destroyed.
+**TODO make LOCAL automatically cleared when the procedure is destroyed (to make saving easier down the road; just use GLOBAL for cross-room persistent stuff!)**
+- input: Inputs happening on the frame that the function is running.
+- state: Info about the game state (whether or not the player can move in the map, the actors currently in the room, etc).
+- func: An object containing every auxilliary function accessible to a procedure (for drawing, changing rooms, etc).
+
+Room procedures: onEnter, onMapMove, onMapInteract

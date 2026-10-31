@@ -1,6 +1,3 @@
-/*
- * room procedures: onEnter, onMapMove, onMapInteract
- */
 let curr_room;
 
 const global_procvars = {};
@@ -23,7 +20,9 @@ const input = {
     left: false,
     right: false,
     up: false,
+    justUp: false,
     down: false,
+    justDown: false,
     continue: false
 };
 
@@ -36,24 +35,9 @@ const func = {
 
 // TODO add auxilliary function for adding, removing (errors on trying to remove sole member), and peeping party members
 // TODO add auxilliary function for changing rooms (including where to place the player)
+// TODO changing to a room should make a deep copy of its tile data so we can implement an aux function for setting tiles (all changes cleared when leaving!)
+// maybe I should just trust the programmer to not modify stuff that probably shouldn't be modified, like inputs, the party (without a setter), etc
 
-/*
- * Whenever an action happens, it can trigger a procedure.
- * Actions can be entering a room, interacting with an agent, moving, whatever.
- * 
- * Procedures have up to three methods:
- *   init: Run when the procedure is triggered.
- *   frame: Run every frame; if this returns true, the procedure is destroyed (removed from the list)
- *          A procedure is only added to the procedures list if it has this method.
- *   destroy: Run when the procedure is destroyed (removed from the procedures list).
- * 
- * Each method gets the arguments:
- *   GLOBAL: An object representing variables all procedures have access to
- *   LOCAL: An object representing variables only this procedure has access to -- not automatically cleared when the procedure is destroyed
- *   input: Inputs happening on the frame that the function is running
- *   state: Info on whether or not the player can move in the map, the actors currently in the room, etc
- *   func: An object containing every auxilliary function accessible to a procedure (for drawing, changing rooms, etc).
-*/
 let procedures = [];
 
 let anim_t = 0;
@@ -85,8 +69,10 @@ function start() {
     // initialize renderer
     render = document.getElementById("canvas").getContext("2d");
 
+    // start update loop
     setInterval(update, 1000 / 60);
 
+    // initialize input
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
 }
@@ -172,6 +158,8 @@ function update() {
     }
 
     input.continue = false;
+    input.justDown = false;
+    input.justUp = false;
 
     anim_t++;
 }
@@ -199,9 +187,9 @@ function onKeyUp(keyevent) {
 function onKeyDown(keyevent) {
 
         switch (keyevent.key) {
-            case "ArrowUp": input.up = true; break;
+            case "ArrowUp": input.up = true; input.justUp = true; break;
             case "ArrowRight": input.right = true; break;
-            case "ArrowDown": input.down = true; break;
+            case "ArrowDown": input.down = true; input.justDown = true; break;
             case "ArrowLeft": input.left = true; break;
             case " ":
                 if (state.can_move_in_map) {
@@ -216,8 +204,8 @@ function onKeyDown(keyevent) {
 
 function changeRoom(roomID, newPlayerX, newPlayerY) {
 
-    // TODO im not sure what we should do with active procedures
-    // TODO also remember to clear the actors array except for the player
+    // TODO destroy all active procedures
+    // TODO clear the actors array except for the player
 
     curr_room = roomID;
     state.playerActor.x = newPlayerX;
@@ -345,6 +333,6 @@ function drawChoice(choices = ["a", "b"], selected_i = 0) {
     for (let i = 0; i < choices.length; i++) {
 
         render.fillStyle = i == selected_i ? "yellow" : "white";
-        render.fillText(choices[i].text, 10, 156 + 12 * i);
+        render.fillText(choices[i], 10, 156 + 12 * i);
     }
 }

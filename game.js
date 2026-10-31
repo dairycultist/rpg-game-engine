@@ -146,8 +146,12 @@ const gamedata = {
 
                     state.can_move_in_map = false;
                     LOCAL.i = 0;
+                    LOCAL.choice_i = 0;
                 },
                 frame(GLOBAL, LOCAL, input, state, func) {
+
+                    if (LOCAL.i == 3 && input.justUp != input.justDown)
+                        LOCAL.choice_i = 1 - LOCAL.choice_i;
 
                     if (input.continue)
                         LOCAL.i++
@@ -156,6 +160,8 @@ const gamedata = {
                         case 0: func.drawDialogue("Wow.", "john", null, "left"); break;
                         case 1: func.drawDialogue("What is this place?", "john", null, "left"); break;
                         case 2: func.drawDialogue("You scratch ur nuts", "john", null, "none"); break;
+                        case 3: func.drawChoice(["Based", "Ew gross"], LOCAL.choice_i); break;
+                        case 4: func.drawDialogue(LOCAL.choice_i == 0 ? "Based" : "Ew gross", "john", null, "left"); break;
                         default: return true;
                     }
 
