@@ -120,7 +120,7 @@ function update() {
             } else {
                 state.playerActor.x += 0.05;
                 if (playerColliding(15, 0) || playerColliding(15, 7)) {
-                    state.playerActor.x = Math.floor(state.playerActor.x) + 0.5;
+                    state.playerActor.x = Math.floor(state.playerActor.x) + 0.52;
                 } else {
                     state.playerActor.direction = "e";
                     state.playerActor.animState = "walk";
