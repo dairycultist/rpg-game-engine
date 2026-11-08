@@ -359,19 +359,19 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     drawUIBox(4, 138, 248, 50);
 
     let i = 0;
-    for (const line of text.split("\n"))
-        drawString(line, 10, 156 + (i++) * 12);
+    drawString(text, 10, 156 + (i++) * 12, "white", 232);
 
     if (speaker == "left") {
 
-        const nameplate_width = gamedata.characters[leftCharacterID].display_name.length * 5 + 20;
+        render.font = DEFAULT_FONT;
+        const nameplate_width = Math.floor(render.measureText(gamedata.characters[leftCharacterID].display_name).width + 13);
 
         drawUIBox(4, 113, nameplate_width, 25);
         drawString(gamedata.characters[leftCharacterID].display_name, 10, 130);
 
     } else if (speaker == "right") {
 
-        const nameplate_width = gamedata.characters[rightCharacterID].display_name.length * 5 + 20;
+        const nameplate_width = Math.floor(render.measureText(gamedata.characters[rightCharacterID].display_name).width + 13);
 
         drawUIBox(252 - nameplate_width, 113, nameplate_width, 25);
         drawString(gamedata.characters[rightCharacterID].display_name, 258 - nameplate_width, 130);
@@ -402,15 +402,24 @@ function drawUIBox(x, y, w, h) {
     // render.strokeRect(x, y, w, h);
 }
 
-function drawString(string, x, y, color = "white", maxWidth = 0) {
+function drawString(string, x, y, color = "white", maxWidth = Infinity) {
+
+    const fontHeight = render.measureText("l").fontBoundingBoxAscent;
 
     render.fillStyle = color;
     render.font = DEFAULT_FONT;
 
     let charX = x;
+    let charY = y;
 
     for (const char of string) {
-        render.fillText(char, charX, y);
+
+        render.fillText(char, charX, charY);
         charX += Math.floor(render.measureText(char).width);
+
+        if (charX - x > maxWidth) {
+            charX = x;
+            charY += fontHeight;
+        }
     }
 }
