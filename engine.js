@@ -197,6 +197,7 @@ function onKeyDown(keyevent) {
                     // just interact generically with the map
                     if (gamedata.rooms[state.roomID].onMapInteract)
                         triggerProcedure(gamedata.rooms[state.roomID].onMapInteract);
+
                 } else {
                     input.continue = true;
                 }
@@ -374,10 +375,15 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
 
 function drawChoice(choices = ["a", "b"], selected_i = 0) {
 
+    const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
+
     drawUIBox(3, 137, 250, 52);
 
-    for (let i = 0; i < choices.length; i++)
-        drawString(choices[i], 10, 155 + 12 * i, i == selected_i ? "yellow" : "white");
+    if (selected_i > 0)
+        drawString(choices[selected_i - 1], 10, 155);
+    drawString(choices[selected_i], 10, 155 + fontHeight, "yellow");
+    if (selected_i < choices.length - 1)
+        drawString(choices[selected_i + 1], 10, 155 + fontHeight * 2);
 }
 
 function drawUIBox(x, y, w, h, string = "") {
