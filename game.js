@@ -183,28 +183,14 @@ const gamedata = {
                 },
                 frame(GLOBAL, LOCAL, input, state, func) {
 
-                    if (LOCAL.i == 3 && input.justUp != input.justDown) {
-
-                        if (input.justUp)
-                            LOCAL.choice_i--;
-                        else
-                            LOCAL.choice_i++;
-
-                        if (LOCAL.choice_i < 0)
-                            LOCAL.choice_i = 4;
-
-                        else if (LOCAL.choice_i > 4)
-                            LOCAL.choice_i = 0;
-                    }
-
                     if (input.continue)
-                        LOCAL.i++
+                        LOCAL.i++;
 
                     switch (LOCAL.i) {
                         case 0: func.drawDialogue("Wow.", "john", null, "left"); break;
                         case 1: func.drawDialogue("What is this place?", "john", null, "left"); break;
                         case 2: func.drawDialogue("You scratch ur nuts", "john", null, "none"); break;
-                        case 3: func.drawChoice(["Based", "Ew gross", "No what", "Blegh", "NUTS??"], LOCAL.choice_i); break;
+                        case 3: LOCAL.choice_i = func.showChoice(["Based", "Ew gross", "No what", "Blegh", "NUTS??"], LOCAL.choice_i); break;
                         case 4: func.drawDialogue(LOCAL.choice_i == 0 ? "Based" : "Scratchie scratch", "john", null, "left"); break;
                         default: return true;
                     }

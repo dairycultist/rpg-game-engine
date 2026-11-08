@@ -21,7 +21,7 @@ const func = {
     triggerProcedure,
     spawnActor,
     drawDialogue,
-    drawChoice,
+    showChoice,
     changeRoom
 };
 
@@ -373,8 +373,24 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     }
 }
 
-function drawChoice(choices = ["a", "b"], selected_i = 0) {
+// both draws the choice and handles the selection logic, returning the currently selected index
+function showChoice(choices = ["a", "b"], selected_i = 0) {
 
+    // selection logic
+    if (input.justUp != input.justDown) {
+
+        if (input.justUp)
+            selected_i--;
+        else
+            selected_i++;
+
+        if (selected_i < 0)
+            selected_i = choices.length - 1;
+        else if (selected_i >= choices.length)
+            selected_i = 0;
+    }
+
+    // draw choice box
     const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
 
     drawUIBox(3, 137, 250, 52);
@@ -384,6 +400,9 @@ function drawChoice(choices = ["a", "b"], selected_i = 0) {
     drawString(choices[selected_i], 10, 155 + fontHeight, "yellow");
     if (selected_i < choices.length - 1)
         drawString(choices[selected_i + 1], 10, 155 + fontHeight * 2);
+
+    // return selected choice index
+    return selected_i;
 }
 
 function drawUIBox(x, y, w, h, string = "") {
