@@ -190,7 +190,7 @@ function onKeyDown(keyevent) {
 
                         if (Math.abs(actor.x - state.playerActor.x) < 1.5 && Math.abs(actor.y - state.playerActor.y) < 1.5) {
 
-                            triggerProcedure(actor.onInteract, { actor });
+                            triggerProcedure(actor.onInteract, { _actor: actor });
                             break;
                         }
                     }
@@ -209,6 +209,8 @@ function onKeyDown(keyevent) {
 function triggerProcedure(procedure, local_init = {}) {
 
     procedure.local_procvars = local_init;
+
+    procedure.local_procvars._i = 0; // this is an engine variable, it's used for dialogue trees (and automatically incremented by showDialogue)
 
     if (procedure.init)
         procedure.init(global_procvars, procedure.local_procvars, input, state, func);
@@ -424,7 +426,7 @@ function showChoice(LOCAL, choices = ["a", "b"]) {
 }
 
 // like showChoice but:
-// - shows the shopkeep
+// - shows the shopkeep talk sprite
 // - adds a "back" button (returns -1)
 // - TODO shows your current money
 // - TODO takes in item objects instead of strings
@@ -448,8 +450,7 @@ function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
     choices.unshift("<back>");
 
     const hold = showChoice(LOCAL, choices);
-
-    return Number.isInteger(hold) ? hold - 1 : null; // since <back> should be -1
+    return Number.isInteger(hold) ? hold - 1 : null;
 }
 
 function drawUIBox(x, y, w, h, string = "") {

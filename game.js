@@ -148,9 +148,8 @@ const gamedata = {
                         init(GLOBAL, LOCAL, input, state, func) {
                             
                             state.can_move_in_map = false;
-                            LOCAL.actor.lookAt(state.playerActor);
-                            state.playerActor.lookAt(LOCAL.actor);
-                            LOCAL._i = 0; // TODO since this is an engine var, let's have the engine initialize it to 0
+                            LOCAL._actor.lookAt(state.playerActor);
+                            state.playerActor.lookAt(LOCAL._actor);
                         },
                         frame(GLOBAL, LOCAL, input, state, func) {
 
@@ -176,15 +175,16 @@ const gamedata = {
                         destroy(GLOBAL, LOCAL, input, state, func) {
 
                             state.can_move_in_map = true;
-                            LOCAL.actor.direction = "s";
+                            LOCAL._actor.direction = "s";
                         }
                     };
 
-                    if (GLOBAL.didIntro)
+                    if (GLOBAL.didIntro) {
+                        LOCAL._i = 7;
                         return;
+                    }
 
                     state.can_move_in_map = false;
-                    LOCAL._i = 0;
                 },
                 frame(GLOBAL, LOCAL, input, state, func) {
 
