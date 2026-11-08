@@ -29,9 +29,8 @@ const gamedata = {
             }
         }
     },
-    fonts: [ // the first font here is the default font, used when a font isn't specified
-        "GrapeSoda.ttf"
-    ],
+    font: "GrapeSoda.ttf", // https://www.dafont.com/grapesoda-2.font
+    fontSize: 16,
     sprites: {
         "player_talksprite.png": null,
         "floor.png": null,

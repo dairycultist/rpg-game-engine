@@ -25,8 +25,6 @@ const func = {
     changeRoom
 };
 
-// font https://www.dafont.com/grapesoda-2.font
-
 // TODO add auxilliary function for adding + removing (errors on trying to remove sole member) partymembers (directly modifying the state.IDK variable is discouraged)
 // TODO changing to a room should make a deep copy of its tile data so we can implement an aux function for setting tiles (all changes cleared when leaving!)
 // maybe I should just trust the programmer to not modify stuff that probably shouldn't be modified, like inputs, the party (without a setter), etc
@@ -39,7 +37,7 @@ let render;
 
 let error = null;
 
-const DEFAULT_FONT = "16px DefaultFont";
+const DEFAULT_FONT = gamedata.fontSize + "px DefaultFont";
 
 // initialize state
 state.playerActor = spawnActor(gamedata.init.playerCharacterID, 0.0, 0.0);
@@ -51,12 +49,11 @@ function start() {
     for (key of Object.keys(gamedata.sprites))
         gamedata.sprites[key] = document.getElementById(key);
 
-    // initialize default font
-    // TODO initialize all fonts
-    new FontFace("DefaultFont", "url(" + gamedata.fonts[0] + ")").load().then((font) => {
+    // initialize font
+    new FontFace("DefaultFont", "url(" + gamedata.font + ")").load().then((font) => {
         document.fonts.add(font);
     }).catch((err) => {
-        error = "Default font either unspecified or invalid!";
+        error = `Font ${ gamedata.font } is invalid!`;
         return;
     });
 
