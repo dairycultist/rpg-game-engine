@@ -366,15 +366,15 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
         render.font = DEFAULT_FONT;
         const nameplate_width = Math.floor(render.measureText(gamedata.characters[leftCharacterID].display_name).width + 13);
 
-        drawUIBox(3, 113, nameplate_width, 25);
-        drawString(gamedata.characters[leftCharacterID].display_name, 9, 130);
+        drawUIBox(3, 114, nameplate_width, 25);
+        drawString(gamedata.characters[leftCharacterID].display_name, 9, 131);
 
     } else if (speaker == "right") {
 
         const nameplate_width = Math.floor(render.measureText(gamedata.characters[rightCharacterID].display_name).width + 13);
 
-        drawUIBox(253 - nameplate_width, 113, nameplate_width, 25);
-        drawString(gamedata.characters[rightCharacterID].display_name, 259 - nameplate_width, 130);
+        drawUIBox(253 - nameplate_width, 114, nameplate_width, 25);
+        drawString(gamedata.characters[rightCharacterID].display_name, 259 - nameplate_width, 131);
     }
 }
 
@@ -388,18 +388,12 @@ function drawChoice(choices = ["a", "b"], selected_i = 0) {
 
 function drawUIBox(x, y, w, h) {
 
-    render.fillStyle = "#2a2b37";
+    render.fillStyle = "black";
+    render.lineWidth = "2";
+    render.strokeStyle = "white";
+
     render.fillRect(x, y, w, h);
-
-    render.fillStyle = "#323740";
-    render.fillRect(x + 1, y + 6, w - 2, h - 7);
-
-    // render.fillStyle = "black";
-    // render.lineWidth = "2";
-    // render.strokeStyle = "white";
-
-    // render.fillRect(x, y, w, h);
-    // render.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    render.strokeRect(x + 1, y + 1, w - 2, h - 2);
 }
 
 function drawString(string, x, y, color = "white", maxWidth = Infinity) {
