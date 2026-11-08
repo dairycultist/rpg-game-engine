@@ -120,7 +120,7 @@ const gamedata = {
                             },
                             frame(GLOBAL, LOCAL, input, state, func) {
 
-                                func.drawDialogue("This right wall sure is nice.");
+                                func.showDialogue(LOCAL, "This right wall sure is nice.");
 
                                 return input.continue;
                             },
@@ -150,17 +150,24 @@ const gamedata = {
                             state.can_move_in_map = false;
                             LOCAL.actor.lookAt(state.playerActor);
                             state.playerActor.lookAt(LOCAL.actor);
-                            LOCAL.i = 0;
+                            LOCAL._i = 0; // TODO since this is an engine var, let's have the engine initialize it to 0
                         },
                         frame(GLOBAL, LOCAL, input, state, func) {
 
-                            if (input.continue)
-                                LOCAL.i++;
-
-                            switch (LOCAL.i) {
-                                case 0: func.drawDialogue("Hi I'm John. In case you didn't know, I sell things.", null, "john", "right"); break;
-                                case 1: LOCAL.choice_i = func.showShop([ "Apple", "Orange" ], LOCAL.choice_i, "john"); break;
-                                case 2: func.drawDialogue("Toodles.", null, "john", "right"); break;
+                            switch (LOCAL._i) {
+                                case 0: func.showDialogue(LOCAL, "Hi I'm John. In case you didn't know, I sell things.", null, "john", "right"); break;
+                                case 1:
+                                    switch (func.showShop(LOCAL, [ "Apple", "Orange" ], "john")) {
+                                        case null: break;
+                                        case -1: LOCAL._i = 2; break;
+                                        default: LOCAL._i = 4; break;
+                                    }
+                                    break;
+                                case 2: func.showDialogue(LOCAL, "Toodles.", null, "john", "right"); break;
+                                case 4:
+                                    if (func.showDialogue(LOCAL, "I don't actually have that in stock right now...", null, "john", "right"))
+                                        LOCAL._i = 1;
+                                    break;
                                 default: return true;
                             }
 
@@ -177,20 +184,23 @@ const gamedata = {
                         return;
 
                     state.can_move_in_map = false;
-                    LOCAL.i = 0;
-                    LOCAL.choice_i = 0;
+                    LOCAL._i = 0;
                 },
                 frame(GLOBAL, LOCAL, input, state, func) {
 
-                    if (input.continue)
-                        LOCAL.i++;
-
-                    switch (LOCAL.i) {
-                        case 0: func.drawDialogue("Wow.", "john", null, "left"); break;
-                        case 1: func.drawDialogue("What is this place?", "john", null, "left"); break;
-                        case 2: func.drawDialogue("You scratch ur nuts", "john", null, "none"); break;
-                        case 3: LOCAL.choice_i = func.showChoice(["Based", "Ew gross", "No what", "Blegh", "NUTS??"], LOCAL.choice_i); break;
-                        case 4: func.drawDialogue(LOCAL.choice_i == 0 ? "Based" : "Scratchie scratch", "john", null, "left"); break;
+                    switch (LOCAL._i) {
+                        case 0: func.showDialogue(LOCAL, "Wow.", "john", null, "left"); break;
+                        case 1: func.showDialogue(LOCAL, "What is this place?", "john", null, "left"); break;
+                        case 2: func.showDialogue(LOCAL, "You scratch ur nuts", "john", null, "none"); break;
+                        case 3:
+                            switch (func.showChoice(LOCAL, ["Based", "Ew gross", "No what", "Blegh", "NUTS??"])) {
+                                case null: break; // nothing has been selected yet
+                                case 0: LOCAL._i = 4; break;
+                                default: LOCAL._i = 6; break; // anything besides "Based"
+                            }
+                        break;
+                        case 4: func.showDialogue(LOCAL, "Based", "john", null, "left"); break;
+                        case 6: func.showDialogue(LOCAL, "Scratchie scratch", "john", null, "left"); break;
                         default: return true;
                     }
 

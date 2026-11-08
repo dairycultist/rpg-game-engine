@@ -20,7 +20,7 @@ const input = {
 const func = {
     triggerProcedure,
     spawnActor,
-    drawDialogue,
+    showDialogue,
     showChoice,
     showShop,
     changeRoom
@@ -311,7 +311,8 @@ function drawMap() {
     }
 }
 
-function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker = "none") {
+// returns true on continue, false otherwise
+function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", speaker = "none") {
 
     // draw characters
     if (leftCharacterID) {
@@ -372,23 +373,33 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
         drawUIBox(253 - nameplate_width, 114, nameplate_width, 25);
         drawString(gamedata.characters[rightCharacterID].display_name, 259 - nameplate_width, 131);
     }
+
+    // progress dialogue tree
+    if (input.continue)
+        LOCAL._i++;
+
+    return input.continue;
 }
 
-// both draws the choice and handles the selection logic, returning the currently selected index
-function showChoice(choices = ["a", "b"], selected_i = 0) {
+// both draws the choice and handles the selection logic, returning the selected index on continue and null otherwise
+function showChoice(LOCAL, choices = ["a", "b"]) {
+
+    // initialize temp variable for holding selected index if not already initialized
+    if (LOCAL._selected_i == undefined)
+        LOCAL._selected_i = 0;
 
     // selection logic
     if (input.justUp != input.justDown) {
 
         if (input.justUp)
-            selected_i--;
+            LOCAL._selected_i--;
         else
-            selected_i++;
+            LOCAL._selected_i++;
 
-        if (selected_i < 0)
-            selected_i = choices.length - 1;
-        else if (selected_i >= choices.length)
-            selected_i = 0;
+        if (LOCAL._selected_i < 0)
+            LOCAL._selected_i = choices.length - 1;
+        else if (LOCAL._selected_i >= choices.length)
+            LOCAL._selected_i = 0;
     }
 
     // draw choice box
@@ -396,14 +407,20 @@ function showChoice(choices = ["a", "b"], selected_i = 0) {
 
     drawUIBox(3, 137, 250, 52);
 
-    if (selected_i > 0)
-        drawString(choices[selected_i - 1], 10, 155);
-    drawString(choices[selected_i], 10, 155 + fontHeight, "yellow");
-    if (selected_i < choices.length - 1)
-        drawString(choices[selected_i + 1], 10, 155 + fontHeight * 2);
+    if (LOCAL._selected_i > 0)
+        drawString(choices[LOCAL._selected_i - 1], 10, 155);
+    drawString(choices[LOCAL._selected_i], 10, 155 + fontHeight, "yellow");
+    if (LOCAL._selected_i < choices.length - 1)
+        drawString(choices[LOCAL._selected_i + 1], 10, 155 + fontHeight * 2);
 
-    // return selected choice index
-    return selected_i;
+    // progress dialogue tree
+    if (input.continue) {
+        const hold = LOCAL._selected_i;
+        delete LOCAL._selected_i; // delete temp variable
+        return hold;
+    } else {
+        return null;
+    }
 }
 
 // like showChoice but:
@@ -411,7 +428,7 @@ function showChoice(choices = ["a", "b"], selected_i = 0) {
 // - adds a "back" button (returns -1)
 // - TODO shows your current money
 // - TODO takes in item objects instead of strings
-function showShop(choices = ["a", "b"], selected_i = 0, shopkeepCharacterID = null) {
+function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
 
     render.font = DEFAULT_FONT;
     const nameplate_width = Math.floor(render.measureText("$67").width + 13);
@@ -430,7 +447,9 @@ function showShop(choices = ["a", "b"], selected_i = 0, shopkeepCharacterID = nu
 
     choices.unshift("<back>");
 
-    return showChoice(choices, selected_i);
+    const hold = showChoice(LOCAL, choices);
+
+    return Number.isInteger(hold) ? hold - 1 : null; // since <back> should be -1
 }
 
 function drawUIBox(x, y, w, h, string = "") {
