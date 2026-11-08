@@ -356,10 +356,7 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     render.filter = "none";
 
     // the dialogue box stuff
-    drawUIBox(3, 137, 250, 52);
-
-    let i = 0;
-    drawString(text, 10, 156 + (i++) * 12, "white", 232);
+    drawUIBox(3, 137, 250, 52, text);
 
     if (speaker == "left") {
 
@@ -383,10 +380,10 @@ function drawChoice(choices = ["a", "b"], selected_i = 0) {
     drawUIBox(3, 137, 250, 52);
 
     for (let i = 0; i < choices.length; i++)
-        drawString(choices[i], 10, 156 + 12 * i, i == selected_i ? "yellow" : "white");
+        drawString(choices[i], 10, 155 + 12 * i, i == selected_i ? "yellow" : "white");
 }
 
-function drawUIBox(x, y, w, h) {
+function drawUIBox(x, y, w, h, string = "") {
 
     render.fillStyle = "black";
     render.lineWidth = "2";
@@ -394,11 +391,15 @@ function drawUIBox(x, y, w, h) {
 
     render.fillRect(x, y, w, h);
     render.strokeRect(x + 1, y + 1, w - 2, h - 2);
+
+    if (string)
+        drawString(string, x + 7, y + 18, "white", w - 14);
 }
 
 function drawString(string, x, y, color = "white", maxWidth = Infinity) {
 
-    const fontHeight = render.measureText("l").fontBoundingBoxAscent;
+    const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
+    const spaceWidth = Math.floor(render.measureText(" ").width);
 
     render.fillStyle = color;
     render.font = DEFAULT_FONT;
@@ -406,14 +407,20 @@ function drawString(string, x, y, color = "white", maxWidth = Infinity) {
     let charX = x;
     let charY = y;
 
-    for (const char of string) {
+    let words = string.split(" ");
 
-        render.fillText(char, charX, charY);
-        charX += Math.floor(render.measureText(char).width);
+    for (let word of words) {
 
-        if (charX - x > maxWidth) {
+        if (charX - x + render.measureText(word).width > maxWidth) {
             charX = x;
             charY += fontHeight;
         }
+
+        for (const char of word) {
+            render.fillText(char, charX, charY);
+            charX += Math.floor(render.measureText(char).width);
+        }
+
+        charX += spaceWidth;
     }
 }
