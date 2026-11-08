@@ -356,7 +356,7 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     render.filter = "none";
 
     // the dialogue box stuff
-    drawUIBox(4, 138, 248, 50);
+    drawUIBox(3, 137, 250, 52);
 
     let i = 0;
     drawString(text, 10, 156 + (i++) * 12, "white", 232);
@@ -366,21 +366,21 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
         render.font = DEFAULT_FONT;
         const nameplate_width = Math.floor(render.measureText(gamedata.characters[leftCharacterID].display_name).width + 13);
 
-        drawUIBox(4, 113, nameplate_width, 25);
-        drawString(gamedata.characters[leftCharacterID].display_name, 10, 130);
+        drawUIBox(3, 113, nameplate_width, 25);
+        drawString(gamedata.characters[leftCharacterID].display_name, 9, 130);
 
     } else if (speaker == "right") {
 
         const nameplate_width = Math.floor(render.measureText(gamedata.characters[rightCharacterID].display_name).width + 13);
 
-        drawUIBox(252 - nameplate_width, 113, nameplate_width, 25);
-        drawString(gamedata.characters[rightCharacterID].display_name, 258 - nameplate_width, 130);
+        drawUIBox(253 - nameplate_width, 113, nameplate_width, 25);
+        drawString(gamedata.characters[rightCharacterID].display_name, 259 - nameplate_width, 130);
     }
 }
 
 function drawChoice(choices = ["a", "b"], selected_i = 0) {
 
-    drawUIBox(4, 138, 248, 50);
+    drawUIBox(3, 137, 250, 52);
 
     for (let i = 0; i < choices.length; i++)
         drawString(choices[i], 10, 156 + 12 * i, i == selected_i ? "yellow" : "white");
@@ -399,7 +399,7 @@ function drawUIBox(x, y, w, h) {
     // render.strokeStyle = "white";
 
     // render.fillRect(x, y, w, h);
-    // render.strokeRect(x, y, w, h);
+    // render.strokeRect(x + 1, y + 1, w - 2, h - 2);
 }
 
 function drawString(string, x, y, color = "white", maxWidth = Infinity) {
