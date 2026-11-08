@@ -343,13 +343,9 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     render.filter = "none";
 
     // the dialogue box stuff
-    render.fillStyle = "black";
-    render.lineWidth = "2";
-    render.strokeStyle = "white";
     render.font = "12px monospace";
-
-    render.fillRect(4, 138, 248, 50);
-    render.strokeRect(4, 138, 248, 50);
+    
+    drawUIBox(4, 138, 248, 50);
 
     render.fillStyle = "white";
     let i = 0;
@@ -360,9 +356,7 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
 
         const nameplate_width = gamedata.characters[leftCharacterID].display_name.length * 5 + 20;
 
-        render.fillStyle = "black";
-        render.fillRect(4, 113, nameplate_width, 25);
-        render.strokeRect(4, 113, nameplate_width, 25);
+        drawUIBox(4, 113, nameplate_width, 25);
 
         render.fillStyle = "white";
         render.fillText(gamedata.characters[leftCharacterID].display_name, 10, 130);
@@ -371,9 +365,7 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
 
         const nameplate_width = gamedata.characters[rightCharacterID].display_name.length * 5 + 20;
 
-        render.fillStyle = "black";
-        render.fillRect(252 - nameplate_width, 113, nameplate_width, 25);
-        render.strokeRect(252 - nameplate_width, 113, nameplate_width, 25);
+        drawUIBox(252 - nameplate_width, 113, nameplate_width, 25);
 
         render.fillStyle = "white";
         render.fillText(gamedata.characters[rightCharacterID].display_name, 258 - nameplate_width, 130);
@@ -382,17 +374,24 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
 
 function drawChoice(choices = ["a", "b"], selected_i = 0) {
 
-    render.fillStyle = "black";
-    render.lineWidth = "2";
-    render.strokeStyle = "white";
     render.font = "12px monospace";
 
-    render.fillRect(4, 138, 248, 50);
-    render.strokeRect(4, 138, 248, 50);
+    drawUIBox(4, 138, 248, 50);
 
     for (let i = 0; i < choices.length; i++) {
 
         render.fillStyle = i == selected_i ? "yellow" : "white";
         render.fillText(choices[i], 10, 156 + 12 * i);
     }
+}
+
+function drawUIBox(x, y, w, h) {
+
+    render.fillStyle = "black";
+    render.lineWidth = "2";
+    render.strokeStyle = "white";
+    // render.font = "12px monospace";
+
+    render.fillRect(x, y, w, h);
+    render.strokeRect(x, y, w, h);
 }
