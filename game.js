@@ -155,13 +155,12 @@ const gamedata = {
                         frame(GLOBAL, LOCAL, input, state, func) {
 
                             if (input.continue)
-                                LOCAL.i++
+                                LOCAL.i++;
 
                             switch (LOCAL.i) {
-                                case 0: func.drawDialogue("Another John?!", "john", "john", "left"); break;
-                                case 1: func.drawDialogue("Hi I'm John.", "john", "john", "right"); break;
-                                case 2: func.drawDialogue("The artist didn't have time to draw another character.", "john", "john", "right"); break;
-                                case 3: func.drawDialogue("zamn", "john", "john", "none"); break;
+                                case 0: func.drawDialogue("Hi I'm John. In case you didn't know, I sell things.", null, "john", "right"); break;
+                                case 1: LOCAL.choice_i = func.showShop([ "Apple", "Orange" ], LOCAL.choice_i, "john"); break;
+                                case 2: func.drawDialogue("Toodles.", null, "john", "right"); break;
                                 default: return true;
                             }
 

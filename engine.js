@@ -22,6 +22,7 @@ const func = {
     spawnActor,
     drawDialogue,
     showChoice,
+    showShop,
     changeRoom
 };
 
@@ -403,6 +404,33 @@ function showChoice(choices = ["a", "b"], selected_i = 0) {
 
     // return selected choice index
     return selected_i;
+}
+
+// like showChoice but:
+// - shows the shopkeep
+// - adds a "back" button (returns -1)
+// - TODO shows your current money
+// - TODO takes in item objects instead of strings
+function showShop(choices = ["a", "b"], selected_i = 0, shopkeepCharacterID = null) {
+
+    render.font = DEFAULT_FONT;
+    const nameplate_width = Math.floor(render.measureText("$67").width + 13);
+
+    drawUIBox(3, 114, nameplate_width, 25);
+    drawString("$67", 9, 131);
+
+    if (shopkeepCharacterID) {
+        render.save();
+        render.translate(256, 0);
+        render.scale(-1, 1);
+        const image = gamedata.sprites[gamedata.characters[shopkeepCharacterID].talk_sprites["DEFAULT"]];
+        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
+        render.restore();
+    }
+
+    choices.unshift("<back>");
+
+    return showChoice(choices, selected_i);
 }
 
 function drawUIBox(x, y, w, h, string = "") {
