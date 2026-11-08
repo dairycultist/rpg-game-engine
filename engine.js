@@ -25,6 +25,8 @@ const func = {
     changeRoom
 };
 
+// font https://www.dafont.com/grapesoda-2.font
+
 // TODO add auxilliary function for adding + removing (errors on trying to remove sole member) partymembers (directly modifying the state.IDK variable is discouraged)
 // TODO changing to a room should make a deep copy of its tile data so we can implement an aux function for setting tiles (all changes cleared when leaving!)
 // maybe I should just trust the programmer to not modify stuff that probably shouldn't be modified, like inputs, the party (without a setter), etc
@@ -37,6 +39,8 @@ let render;
 
 let error = null;
 
+const DEFAULT_FONT = "16px DefaultFont";
+
 // initialize state
 state.playerActor = spawnActor(gamedata.init.playerCharacterID, 0.0, 0.0);
 changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
@@ -46,6 +50,15 @@ function start() {
     // gather all images from the DOM into the gamedata
     for (key of Object.keys(gamedata.sprites))
         gamedata.sprites[key] = document.getElementById(key);
+
+    // initialize default font
+    // TODO initialize all fonts
+    new FontFace("DefaultFont", "url(" + gamedata.fonts[0] + ")").load().then((font) => {
+        document.fonts.add(font);
+    }).catch((err) => {
+        error = "Default font either unspecified or invalid!";
+        return;
+    });
 
     // initialize renderer
     render = document.getElementById("canvas").getContext("2d");
@@ -63,7 +76,7 @@ function update() {
     if (error) {
 
         render.fillStyle = "red";
-        render.font = "12px monospace";
+        render.font = DEFAULT_FONT;
         render.fillText(error, 0, 40);
         error = " ";
         return;
@@ -343,55 +356,61 @@ function drawDialogue(text, leftCharacterID = "", rightCharacterID = "", speaker
     render.filter = "none";
 
     // the dialogue box stuff
-    render.font = "12px monospace";
-    
     drawUIBox(4, 138, 248, 50);
 
-    render.fillStyle = "white";
     let i = 0;
     for (const line of text.split("\n"))
-        render.fillText(line, 10, 156 + (i++) * 12);
+        drawString(line, 10, 156 + (i++) * 12);
 
     if (speaker == "left") {
 
         const nameplate_width = gamedata.characters[leftCharacterID].display_name.length * 5 + 20;
 
         drawUIBox(4, 113, nameplate_width, 25);
-
-        render.fillStyle = "white";
-        render.fillText(gamedata.characters[leftCharacterID].display_name, 10, 130);
+        drawString(gamedata.characters[leftCharacterID].display_name, 10, 130);
 
     } else if (speaker == "right") {
 
         const nameplate_width = gamedata.characters[rightCharacterID].display_name.length * 5 + 20;
 
         drawUIBox(252 - nameplate_width, 113, nameplate_width, 25);
-
-        render.fillStyle = "white";
-        render.fillText(gamedata.characters[rightCharacterID].display_name, 258 - nameplate_width, 130);
+        drawString(gamedata.characters[rightCharacterID].display_name, 258 - nameplate_width, 130);
     }
 }
 
 function drawChoice(choices = ["a", "b"], selected_i = 0) {
 
-    render.font = "12px monospace";
-
     drawUIBox(4, 138, 248, 50);
 
-    for (let i = 0; i < choices.length; i++) {
-
-        render.fillStyle = i == selected_i ? "yellow" : "white";
-        render.fillText(choices[i], 10, 156 + 12 * i);
-    }
+    for (let i = 0; i < choices.length; i++)
+        drawString(choices[i], 10, 156 + 12 * i, i == selected_i ? "yellow" : "white");
 }
 
 function drawUIBox(x, y, w, h) {
 
-    render.fillStyle = "black";
-    render.lineWidth = "2";
-    render.strokeStyle = "white";
-    // render.font = "12px monospace";
-
+    render.fillStyle = "#2a2b37";
     render.fillRect(x, y, w, h);
-    render.strokeRect(x, y, w, h);
+
+    render.fillStyle = "#323740";
+    render.fillRect(x + 1, y + 6, w - 2, h - 7);
+
+    // render.fillStyle = "black";
+    // render.lineWidth = "2";
+    // render.strokeStyle = "white";
+
+    // render.fillRect(x, y, w, h);
+    // render.strokeRect(x, y, w, h);
+}
+
+function drawString(string, x, y, color = "white", maxWidth = 0) {
+
+    render.fillStyle = color;
+    render.font = DEFAULT_FONT;
+
+    let charX = x;
+
+    for (const char of string) {
+        render.fillText(char, charX, y);
+        charX += Math.floor(render.measureText(char).width);
+    }
 }

@@ -29,6 +29,9 @@ const gamedata = {
             }
         }
     },
+    fonts: [ // the first font here is the default font, used when a font isn't specified
+        "GrapeSoda.ttf"
+    ],
     sprites: {
         "player_talksprite.png": null,
         "floor.png": null,
@@ -158,7 +161,7 @@ const gamedata = {
                             switch (LOCAL.i) {
                                 case 0: func.drawDialogue("Another John?!", "john", "john", "left"); break;
                                 case 1: func.drawDialogue("Hi I'm John.", "john", "john", "right"); break;
-                                case 2: func.drawDialogue("The artist didn't have time to\ndraw another character.", "john", "john", "right"); break;
+                                case 2: func.drawDialogue("The artist didn't have time to draw another character.", "john", "john", "right"); break;
                                 case 3: func.drawDialogue("zamn", "john", "john", "none"); break;
                                 default: return true;
                             }
