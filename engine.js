@@ -313,8 +313,9 @@ function drawMap() {
     }
 }
 
-/* Draws the dialoguebox containing the text, displaying left and right characters (if present). "speaker" may be one of ["left", "right", "none"], which
- * determines which of the characters is represented as the current speaker.
+/* Draws the dialoguebox containing the string stored in "text", displaying left and right characters (if present).
+ * "speaker" may be one of ["left", "right", "none"], which determines which of the characters is represented as the
+ * current speaker.
  * 
  * Handles input (that is, when "input.continue" is true, "LOCAL._i" is incremented by one).
  * 
@@ -331,13 +332,7 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
             return;
         }
 
-        if (speaker == "left")
-            render.filter = "none";
-        else
-            render.filter = "brightness(80%)";
-
-        const image = gamedata.sprites[gamedata.characters[leftCharacterID].talk_sprites["DEFAULT"]];
-        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
+        drawCharacterTalkSprite(leftCharacterID, false, speaker == "left");
     }
 
     if (rightCharacterID) {
@@ -348,17 +343,7 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
             return;
         }
 
-        if (speaker == "right")
-            render.filter = "none";
-        else
-            render.filter = "brightness(80%)";
-
-        render.save();
-        render.translate(256, 0);
-        render.scale(-1, 1);
-        const image = gamedata.sprites[gamedata.characters[rightCharacterID].talk_sprites["DEFAULT"]];
-        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
-        render.restore();
+        drawCharacterTalkSprite(rightCharacterID, true, speaker == "right");
     }
 
     render.filter = "none";
@@ -449,7 +434,7 @@ function showChoice(LOCAL, choices = ["a", "b"]) {
  * 
  * Handles input the same way as showChoice(...).
  * 
- * Returns the same as showChoice(...), except will return -1 if "<back>" is chosen.
+ * Returns the same way as showChoice(...), except will return -1 if "<back>" is chosen.
  */
 function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
 
@@ -462,14 +447,8 @@ function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
     drawUIBox(3, 114, nameplate_width, 25);
     drawString("$67", 9, 131);
 
-    if (shopkeepCharacterID) {
-        render.save();
-        render.translate(256, 0);
-        render.scale(-1, 1);
-        const image = gamedata.sprites[gamedata.characters[shopkeepCharacterID].talk_sprites["DEFAULT"]];
-        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
-        render.restore();
-    }
+    if (shopkeepCharacterID)
+        drawCharacterTalkSprite(shopkeepCharacterID, true);
 
     choices.unshift("<back>");
 
@@ -516,5 +495,25 @@ function drawString(string, x, y, color = "white", maxWidth = Infinity) {
         }
 
         charX += spaceWidth;
+    }
+}
+
+function drawCharacterTalkSprite(characterID, isOnRight = false, isActive = true) {
+
+    render.filter = isActive ? "none" : "brightness(80%)";
+
+    const image = gamedata.sprites[gamedata.characters[characterID].talk_sprites["DEFAULT"]];
+
+    if (isOnRight) {
+
+        render.save();
+        render.translate(256, 0);
+        render.scale(-1, 1);
+        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
+        render.restore();
+
+    } else {
+
+        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
     }
 }
