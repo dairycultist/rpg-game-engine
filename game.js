@@ -32,6 +32,7 @@ const gamedata = {
     font: "GrapeSoda.ttf", // https://www.dafont.com/grapesoda-2.font
     fontSize: 16,
     sprites: {
+        "_pointer.png": null, // reserved
         "player_talksprite.png": null,
         "floor.png": null,
         "wall_top.png": null,

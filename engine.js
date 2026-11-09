@@ -404,9 +404,14 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
         }
     }
     drawUIBox(3, 137, 250, 52, text.substring(0, LOCAL._typewriter_i));
-    if (LOCAL._typewriter_i == text.length)
-        drawString(">", 242, 185, "yellow");
 
+    // pointer indicating the dialogue is done
+    if (LOCAL._typewriter_i == text.length) {
+
+        render.drawImage(gamedata.sprites["_pointer.png"], 232 + Math.floor(Math.sin(anim_t * 0.2) + 0.5), 170);
+    }
+
+    // speaker title
     if (speaker == "left") {
 
         render.font = DEFAULT_FONT;
