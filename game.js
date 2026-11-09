@@ -134,7 +134,8 @@ const gamedata = {
 
                         func.triggerProcedure({
                             init(GLOBAL, LOCAL, input, state, func) {
-                                state.mapCanMove = false;
+
+                                state.currAction = "chatting";
                             },
                             frame(GLOBAL, LOCAL, input, state, func) {
 
@@ -143,7 +144,8 @@ const gamedata = {
                                 return input.continue;
                             },
                             destroy(GLOBAL, LOCAL, input, state, func) {
-                                state.mapCanMove = true;
+
+                                state.currAction = "map";
                             }
                         });
                     }
@@ -165,7 +167,7 @@ const gamedata = {
 
                         init(GLOBAL, LOCAL, input, state, func) {
                             
-                            state.mapCanMove = false;
+                            state.currAction = "chatting";
                             LOCAL._actor.lookAt(state.playerActor);
                             state.playerActor.lookAt(LOCAL._actor);
                         },
@@ -192,7 +194,7 @@ const gamedata = {
                         },
                         destroy(GLOBAL, LOCAL, input, state, func) {
 
-                            state.mapCanMove = true;
+                            state.currAction = "map";
                             LOCAL._actor.direction = "s";
                         }
                     };
@@ -202,7 +204,7 @@ const gamedata = {
                         return;
                     }
 
-                    state.mapCanMove = false;
+                    state.currAction = "chatting";
                 },
                 frame(GLOBAL, LOCAL, input, state, func) {
 
@@ -226,7 +228,7 @@ const gamedata = {
                 },
                 destroy(GLOBAL, LOCAL, input, state, func) {
 
-                    state.mapCanMove = true;
+                    state.currAction = "map";
                     GLOBAL.didIntro = true;
                 }
             }

@@ -27,8 +27,7 @@ const func = {
 
 const state = {
     roomID: "", // directly modifying the state.roomID variable is discouraged
-    mapCanMove: true,
-    menuShowing: false,
+    currAction: "map", // [map, chatting, menu1, menu2]
     menuPage: 0,
     playerActor: null,
     equipment: [],
@@ -90,7 +89,7 @@ function update() {
     // player movement in map
     state.playerActor.animState = "idle";
 
-    if (state.mapCanMove) {
+    if (state.currAction == "map") {
 
         if (input.left != input.right) {
 
@@ -146,10 +145,11 @@ function update() {
     drawMap();
 
     // draw/process the menu
-    if (state.menuShowing) {
+    if (state.currAction == "menu1" || state.currAction == "menu2") {
 
         // process
-        state.menuPage = upDownSelect(state.menuPage, 4);
+        if (state.currAction == "menu1")
+            state.menuPage = upDownSelect(state.menuPage, 4);
 
         // draw
         const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
@@ -159,27 +159,26 @@ function update() {
         drawUIBox(92, 8, 156, 120);
         drawUIBox(92, 132, 156, 52);
 
-        render.drawImage(gamedata.sprites["_pointer.png"], -4, 14 + state.menuPage * fontHeight);
+        if (state.currAction == "menu1") {
+            render.drawImage(gamedata.sprites["_pointer.png"], -4, 14 + state.menuPage * fontHeight);
+        } else {
+            render.drawImage(gamedata.sprites["_pointer.png"], 80, 14);
+        }
 
-        drawString("Party", 15, 26, state.menuPage == 0 ? "yellow" : "white");
-        drawString("Equipment", 15, 26 + fontHeight, state.menuPage == 1 ? "yellow" : "white");
-        drawString("Items", 15, 26 + fontHeight * 2, state.menuPage == 2 ? "yellow" : "white");
-        drawString("Key Items", 15, 26 + fontHeight * 3, state.menuPage == 3 ? "yellow" : "white");
+        drawString("Items", 15, 26, state.menuPage == 0 ? "yellow" : "white");
+        drawString("Key Items", 15, 26 + fontHeight, state.menuPage == 1 ? "yellow" : "white");
+        drawString("Equipment", 15, 26 + fontHeight * 2, state.menuPage == 2 ? "yellow" : "white");
+        drawString("YOU", 15, 26 + fontHeight * 3, state.menuPage == 3 ? "yellow" : "white");
+        // TODO list all the party members, maybe separated slightly from the other pages?
 
         // draw page content
         switch (state.menuPage) {
 
             case 0:
-                render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14);
-                drawString("---", 120, 26, "gray");
-                render.drawImage(gamedata.sprites["_armor_body.png"], 99, 34);
-                drawString("---", 120, 46, "gray");
-                render.drawImage(gamedata.sprites["_armor_arm.png"], 99, 54);
-                drawString("---", 120, 66, "gray");
-                render.drawImage(gamedata.sprites["_weapon.png"], 99, 74);
-                drawString("---", 120, 86, "gray");
                 break;
             case 1:
+                break;
+            case 2:
                 for (let i = 0; i < state.equipment.length; i++) {
 
                     switch (state.equipment[i].type) {
@@ -191,9 +190,15 @@ function update() {
                     drawString(state.equipment[i].display_name, 120, 26 + i * 20);
                 }
                 break;
-            case 2:
-                break;
             case 3:
+                render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14);
+                drawString("---", 120, 26, "gray");
+                render.drawImage(gamedata.sprites["_armor_body.png"], 99, 34);
+                drawString("---", 120, 46, "gray");
+                render.drawImage(gamedata.sprites["_armor_arm.png"], 99, 54);
+                drawString("---", 120, 66, "gray");
+                render.drawImage(gamedata.sprites["_weapon.png"], 99, 74);
+                drawString("---", 120, 86, "gray");
                 break;
         }
     }
@@ -240,40 +245,46 @@ function onKeyDown(keyevent) {
         case "ArrowDown": input.down = true; input.justDown = true; break;
         case "ArrowLeft": input.left = true; break;
         case " ":
-            if (state.mapCanMove) {
+            switch (state.currAction) {
+                case "map":
 
-                // first check if we're close enough to any actor to interact with them
-                for (const actor of state.actors) {
+                    // first check if we're close enough to any actor to interact with them
+                    for (const actor of state.actors) {
 
-                    if (actor == state.playerActor)
-                        continue;
+                        if (actor == state.playerActor)
+                            continue;
 
-                    if (Math.abs(actor.x - state.playerActor.x) < 1.5 && Math.abs(actor.y - state.playerActor.y) < 1.5) {
+                        if (Math.abs(actor.x - state.playerActor.x) < 1.5 && Math.abs(actor.y - state.playerActor.y) < 1.5) {
 
-                        triggerProcedure(actor.onInteract, { _actor: actor });
-                        break;
+                            triggerProcedure(actor.onInteract, { _actor: actor });
+                            break;
+                        }
                     }
-                }
 
-                // just interact generically with the map
-                if (gamedata.rooms[state.roomID].onMapInteract)
-                    triggerProcedure(gamedata.rooms[state.roomID].onMapInteract);
-
-            } else {
-                input.continue = true;
+                    // just interact generically with the map
+                    if (gamedata.rooms[state.roomID].onMapInteract)
+                        triggerProcedure(gamedata.rooms[state.roomID].onMapInteract);
+                    break;
+                case "menu1":
+                    state.currAction = "menu2";
+                    break;
+                default:
+                    input.continue = true;
+                    break;
             }
             break;
         case "Escape":
-            if (state.mapCanMove) {
-
-                state.mapCanMove = false;
-                state.menuShowing = true;
-                state.menuPage = 0;
-
-            } else if (state.menuShowing) {
-
-                state.mapCanMove = true;
-                state.menuShowing = false;
+            switch (state.currAction) {
+                case "map":
+                    state.currAction = "menu1";
+                    state.menuPage = 0;
+                    break;
+                case "menu1":
+                    state.currAction = "map";
+                    break;
+                case "menu2":
+                    state.currAction = "menu1";
+                    break;
             }
             break;
     }
