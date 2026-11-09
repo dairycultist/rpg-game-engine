@@ -313,7 +313,13 @@ function drawMap() {
     }
 }
 
-// returns true on continue, false otherwise
+/* Draws the dialoguebox containing the text, displaying left and right characters (if present). "speaker" may be one of ["left", "right", "none"], which
+ * determines which of the characters is represented as the current speaker.
+ * 
+ * Handles input (that is, when "input.continue" is true, "LOCAL._i" is incremented by one).
+ * 
+ * Returns true on continue, false otherwise (to accomodate logic that needs to happen between instances of dialogue).
+ */
 function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", speaker = "none") {
 
     // draw characters
@@ -383,7 +389,20 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
     return input.continue;
 }
 
-// both draws the choice and handles the selection logic, returning the selected index on continue and null otherwise
+/* Draws a choicebox with the string elements in "choices" as the choices, storing the selected choice's index in LOCAL._selected_i.
+ * 
+ * Handles input for selecting between choices (that is, modifying LOCAL._selected_i).
+ * 
+ * Returns the selected choice's index on continue (in which case it deletes LOCAL._selected_i) and null otherwise. The programmer
+ * should switch on the return value as follows:
+ * 
+ * switch (showChoice(...)) {
+ *   case null: break;
+ *   case 0: LOCAL._i = <dialogue position of first choice>; break;
+ *   case 1: LOCAL._i = <dialogue position of second choice>; break;
+ *   ...
+ * }
+ */
 function showChoice(LOCAL, choices = ["a", "b"]) {
 
     // initialize temp variable for holding selected index if not already initialized
@@ -425,12 +444,17 @@ function showChoice(LOCAL, choices = ["a", "b"]) {
     }
 }
 
-// like showChoice but:
-// - shows the shopkeep talk sprite
-// - adds a "back" button (returns -1)
-// - TODO shows your current money
-// - TODO takes in item objects instead of strings
+/* Draws the shopkeep talk sprite (if provided), your current money, and the drawing of showChoice(LOCAL, choices). This
+ * drawing will also include "<back>" as a choice.
+ * 
+ * Handles input the same way as showChoice(...).
+ * 
+ * Returns the same as showChoice(...), except will return -1 if "<back>" is chosen.
+ */
 function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
+
+    // TODO shows your current money
+    // TODO takes in item objects instead of strings
 
     render.font = DEFAULT_FONT;
     const nameplate_width = Math.floor(render.measureText("$67").width + 13);

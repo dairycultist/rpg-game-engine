@@ -29,12 +29,18 @@ Procedures have up to three methods:
 - destroy: Run when the procedure is destroyed (removed from the procedures list).
 
 Each method gets the arguments:
-- GLOBAL: An object representing variables all procedures have access to.
-- LOCAL: An object representing variables only this procedure has access to -- automatically cleared when the procedure is destroyed (to make saving easier down the road; just use GLOBAL for cross-room persistent stuff!).
-- input: Inputs happening on the frame that the function is running.
-- state: Info about the game state (whether or not the player can move in the map, the actors currently in the room, etc).
-- func: An object containing every auxilliary function accessible to a procedure (for drawing, changing rooms, etc).
+- `GLOBAL`: An object representing variables all procedures have access to.
+- `LOCAL`: An object representing variables only this procedure has access to
+  - Automatically cleared when the procedure is destroyed (to make saving easier down the road; just use GLOBAL for cross-procedure persistent stuff!).
+  - The engine creates local engine variables (prefixed with `_`) for certain functions; for example, `_i` should be used in a `switch` statement for creating a dialogue tree, and it is automatically incremented by the function `showDialogue` when the user presses space.
+- `input`: Inputs happening on the frame that the function is running.
+- `state`: Info about the game state (whether or not the player can move in the map, the actors currently in the room, etc).
+- `func`: An object containing every auxilliary function accessible to a procedure (for drawing, changing rooms, etc).
 
-Room procedures: onEnter, onMapMove, onMapInteract
+### Room procedures
+onEnter, onMapMove, onMapInteract
 
-Actor procedures (all of these have the actor object passed as "LOCAL.actor"): onInteract
+### Actor procedures
+(all of these have the actor object passed as `LOCAL._actor`)
+
+onInteract
