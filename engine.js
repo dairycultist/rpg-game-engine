@@ -428,15 +428,25 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
         drawString(gamedata.characters[rightCharacterID].display_name, 259 - nameplate_width, 131);
     }
 
-    // progress dialogue tree
     if (input.continue) {
 
-        LOCAL._i++;
-        delete LOCAL._typewriter_i;
-        delete LOCAL._typewriter_timer;
+        if (LOCAL._typewriter_i == text.length) {
+
+            // progress dialogue tree
+            LOCAL._i++;
+            delete LOCAL._typewriter_i;
+            delete LOCAL._typewriter_timer;
+
+            return true;
+
+        } else {
+
+            // finish typewriter effect early but don't progress dialogue tree
+            LOCAL._typewriter_i = text.length;
+        }
     }
 
-    return input.continue;
+    return false;
 }
 
 /* Draws a choicebox with the string elements in "choices" as the choices, storing the selected choice's index in LOCAL._selected_i.
