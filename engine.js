@@ -477,11 +477,13 @@ function showChoice(LOCAL, choices = ["a", "b"]) {
 
     drawUIBox(3, 137, 250, 52);
 
+    render.drawImage(gamedata.sprites["_pointer.png"], 10, 155);
+
     if (LOCAL._selected_i > 0)
-        drawString(choices[LOCAL._selected_i - 1], 10, 155);
-    drawString(choices[LOCAL._selected_i], 10, 155 + fontHeight, "yellow");
+        drawString(choices[LOCAL._selected_i - 1], 30, 155);
+    drawString(choices[LOCAL._selected_i], 30, 155 + fontHeight, "yellow");
     if (LOCAL._selected_i < choices.length - 1)
-        drawString(choices[LOCAL._selected_i + 1], 10, 155 + fontHeight * 2);
+        drawString(choices[LOCAL._selected_i + 1], 30, 155 + fontHeight * 2);
 
     // progress dialogue tree
     if (input.continue) {
@@ -504,6 +506,7 @@ function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
 
     // TODO shows your current money
     // TODO takes in item objects instead of strings
+    // TODO show item description + price
 
     render.font = DEFAULT_FONT;
     const nameplate_width = Math.floor(render.measureText("$67").width + 13);
