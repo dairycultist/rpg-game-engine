@@ -317,11 +317,19 @@ function drawMap() {
  * "speaker" may be one of ["left", "right", "none"], which determines which of the characters is represented as the
  * current speaker.
  * 
+ * Internally, uses "LOCAL._typewriter_i" and "LOCAL._typewriter_timer" to create a typewriter effect, which is
+ * deleted upon continuing.
+ * 
  * Handles input (that is, when "input.continue" is true, "LOCAL._i" is incremented by one).
  * 
  * Returns true on continue, false otherwise (to accomodate logic that needs to happen between instances of dialogue).
  */
 function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", speaker = "none") {
+
+    if (LOCAL._typewriter_i == undefined) {
+        LOCAL._typewriter_i = 0;
+        LOCAL._typewriter_timer = 0;
+    }
 
     // draw characters
     if (leftCharacterID) {
@@ -348,8 +356,18 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
 
     render.filter = "none";
 
-    // the dialogue box stuff
-    drawUIBox(3, 137, 250, 52, text);
+    // the dialoguebox stuff
+    if (LOCAL._typewriter_i < text.length) {
+
+        LOCAL._typewriter_timer--;
+
+        if (LOCAL._typewriter_timer <= 0) {
+
+            LOCAL._typewriter_timer = text[LOCAL._typewriter_i] == "." ? 20 : 2;
+            LOCAL._typewriter_i++;
+        }
+    }
+    drawUIBox(3, 137, 250, 52, text.substring(0, LOCAL._typewriter_i));
 
     if (speaker == "left") {
 
@@ -368,8 +386,11 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
     }
 
     // progress dialogue tree
-    if (input.continue)
+    if (input.continue) {
         LOCAL._i++;
+        delete LOCAL._typewriter_i;
+        delete LOCAL._typewriter_timer;
+    }
 
     return input.continue;
 }
