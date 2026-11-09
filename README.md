@@ -12,11 +12,12 @@ I wanna tell stories! I wanna make worlds! I wanna flesh out unique characters a
 
 ## Textures
 
-| Texture      | Resolution |
-| ------------ | ---------- |
-| Talk sprites | 128x128    |
-| Map tiles    | 16x16      |
-| Map sprites  | Any        |
+| Texture                | Resolution |
+| ---------------------- | ---------- |
+| Talk sprites           | 128x128    |
+| Map tiles              | 16x16      |
+| Map sprites            | Any        |
+| Pointer `_pointer.png` | 16x16      |
 
 ## Procedures
 

@@ -155,6 +155,8 @@ function update() {
         drawUIBox(8, 8, 80, 176);
         drawUIBox(92, 8, 156, 176);
 
+        render.drawImage(gamedata.sprites["_pointer.png"], -4, 14 + state.menu_page * fontHeight);
+
         drawString("Party", 15, 26, state.menu_page == 0 ? "yellow" : "white");
         drawString("Equipment", 15, 26 + fontHeight, state.menu_page == 1 ? "yellow" : "white");
         drawString("Items", 15, 26 + fontHeight * 2, state.menu_page == 2 ? "yellow" : "white");
@@ -477,7 +479,7 @@ function showChoice(LOCAL, choices = ["a", "b"]) {
 
     drawUIBox(3, 137, 250, 52);
 
-    render.drawImage(gamedata.sprites["_pointer.png"], 10, 155);
+    render.drawImage(gamedata.sprites["_pointer.png"], 11, 156);
 
     if (LOCAL._selected_i > 0)
         drawString(choices[LOCAL._selected_i - 1], 30, 155);
