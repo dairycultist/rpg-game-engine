@@ -3,7 +3,18 @@ const gamedata = {
         playerCharacterID: "john",
         room: "bedroom",
         playerX: 4.0,
-        playerY: 4.0
+        playerY: 4.0,
+        equipment: [
+            {
+                display_name: "Freddy Mask",
+                type: "head", // [head, body, arm (bracelet, shield, whatever), weapon]
+                // TODO stat bonuses, idk what stats im gonna have, probably like Speed which determines turn order
+            },
+            {
+                display_name: "Giant Gummy Worm",
+                type: "weapon"
+            }
+        ]
     },
     characters: {
         john: {
@@ -32,7 +43,13 @@ const gamedata = {
     font: "GrapeSoda.ttf", // https://www.dafont.com/grapesoda-2.font
     fontSize: 16,
     sprites: {
-        "_pointer.png": null, // reserved
+        // reserved
+        "_pointer.png": null,
+        "_armor_head.png": null,
+        "_armor_body.png": null,
+        "_armor_arm.png": null,
+        "_weapon.png": null,
+
         "player_talksprite.png": null,
         "floor.png": null,
         "wall_top.png": null,
@@ -117,7 +134,7 @@ const gamedata = {
 
                         func.triggerProcedure({
                             init(GLOBAL, LOCAL, input, state, func) {
-                                state.can_move_in_map = false;
+                                state.mapCanMove = false;
                             },
                             frame(GLOBAL, LOCAL, input, state, func) {
 
@@ -126,7 +143,7 @@ const gamedata = {
                                 return input.continue;
                             },
                             destroy(GLOBAL, LOCAL, input, state, func) {
-                                state.can_move_in_map = true;
+                                state.mapCanMove = true;
                             }
                         });
                     }
@@ -148,7 +165,7 @@ const gamedata = {
 
                         init(GLOBAL, LOCAL, input, state, func) {
                             
-                            state.can_move_in_map = false;
+                            state.mapCanMove = false;
                             LOCAL._actor.lookAt(state.playerActor);
                             state.playerActor.lookAt(LOCAL._actor);
                         },
@@ -175,7 +192,7 @@ const gamedata = {
                         },
                         destroy(GLOBAL, LOCAL, input, state, func) {
 
-                            state.can_move_in_map = true;
+                            state.mapCanMove = true;
                             LOCAL._actor.direction = "s";
                         }
                     };
@@ -185,7 +202,7 @@ const gamedata = {
                         return;
                     }
 
-                    state.can_move_in_map = false;
+                    state.mapCanMove = false;
                 },
                 frame(GLOBAL, LOCAL, input, state, func) {
 
@@ -209,7 +226,7 @@ const gamedata = {
                 },
                 destroy(GLOBAL, LOCAL, input, state, func) {
 
-                    state.can_move_in_map = true;
+                    state.mapCanMove = true;
                     GLOBAL.didIntro = true;
                 }
             }

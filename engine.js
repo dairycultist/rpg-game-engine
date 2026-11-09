@@ -1,13 +1,10 @@
 const global_procvars = {};
 
-const state = {
-    roomID: "", // directly modifying the state.roomID variable is discouraged
-    can_move_in_map: true,
-    showing_menu: false,
-    menu_page: 0,
-    playerActor: null,
-    actors: []
-};
+let procedures = [];
+
+let render;
+
+let error = null;
 
 const input = {
     left: false,
@@ -28,6 +25,21 @@ const func = {
     changeRoom
 };
 
+const state = {
+    roomID: "", // directly modifying the state.roomID variable is discouraged
+    mapCanMove: true,
+    menuShowing: false,
+    menuPage: 0,
+    playerActor: null,
+    equipment: [],
+    actors: []
+};
+
+// initialize state
+state.playerActor = spawnActor(gamedata.init.playerCharacterID, 0.0, 0.0);
+state.equipment = gamedata.init.equipment;
+changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
+
 // TODO just needs an inventory menu, a party menu (not necessarily a full party system yet, but you should be able to
 // equip stuff on your main guy), and a combat system and that's basically the engine done
 
@@ -35,19 +47,9 @@ const func = {
 // TODO changing to a room should make a deep copy of its tile data so we can implement an aux function for setting tiles (all changes cleared when leaving!)
 // maybe I should just trust the programmer to not modify stuff that probably shouldn't be modified, like inputs, the party (without a setter), etc
 
-let procedures = [];
-
 let anim_t = 0;
 
-let render;
-
-let error = null;
-
 const DEFAULT_FONT = gamedata.fontSize + "px DefaultFont";
-
-// initialize state
-state.playerActor = spawnActor(gamedata.init.playerCharacterID, 0.0, 0.0);
-changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
 function start() {
 
@@ -56,7 +58,7 @@ function start() {
         gamedata.sprites[key] = document.getElementById(key);
 
     // initialize font
-    new FontFace("DefaultFont", "url(" + gamedata.font + ")").load().then((font) => {
+    new FontFace("DefaultFont", "url(res/" + gamedata.font + ")").load().then((font) => {
         document.fonts.add(font);
     }).catch((err) => {
         error = `Font ${ gamedata.font } is invalid!`;
@@ -88,7 +90,7 @@ function update() {
     // player movement in map
     state.playerActor.animState = "idle";
 
-    if (state.can_move_in_map) {
+    if (state.mapCanMove) {
 
         if (input.left != input.right) {
 
@@ -144,23 +146,56 @@ function update() {
     drawMap();
 
     // draw/process the menu
-    if (state.showing_menu) {
+    if (state.menuShowing) {
 
         // process
-        state.menu_page = upDownSelect(state.menu_page, 4);
+        state.menuPage = upDownSelect(state.menuPage, 4);
 
         // draw
         const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
 
         drawUIBox(8, 8, 80, 176);
-        drawUIBox(92, 8, 156, 176);
+        // drawUIBox(92, 8, 156, 176);
+        drawUIBox(92, 8, 156, 120);
+        drawUIBox(92, 132, 156, 52);
 
-        render.drawImage(gamedata.sprites["_pointer.png"], -4, 14 + state.menu_page * fontHeight);
+        render.drawImage(gamedata.sprites["_pointer.png"], -4, 14 + state.menuPage * fontHeight);
 
-        drawString("Party", 15, 26, state.menu_page == 0 ? "yellow" : "white");
-        drawString("Equipment", 15, 26 + fontHeight, state.menu_page == 1 ? "yellow" : "white");
-        drawString("Items", 15, 26 + fontHeight * 2, state.menu_page == 2 ? "yellow" : "white");
-        drawString("Key Items", 15, 26 + fontHeight * 3, state.menu_page == 3 ? "yellow" : "white");
+        drawString("Party", 15, 26, state.menuPage == 0 ? "yellow" : "white");
+        drawString("Equipment", 15, 26 + fontHeight, state.menuPage == 1 ? "yellow" : "white");
+        drawString("Items", 15, 26 + fontHeight * 2, state.menuPage == 2 ? "yellow" : "white");
+        drawString("Key Items", 15, 26 + fontHeight * 3, state.menuPage == 3 ? "yellow" : "white");
+
+        // draw page content
+        switch (state.menuPage) {
+
+            case 0:
+                render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14);
+                drawString("---", 120, 26, "gray");
+                render.drawImage(gamedata.sprites["_armor_body.png"], 99, 34);
+                drawString("---", 120, 46, "gray");
+                render.drawImage(gamedata.sprites["_armor_arm.png"], 99, 54);
+                drawString("---", 120, 66, "gray");
+                render.drawImage(gamedata.sprites["_weapon.png"], 99, 74);
+                drawString("---", 120, 86, "gray");
+                break;
+            case 1:
+                for (let i = 0; i < state.equipment.length; i++) {
+
+                    switch (state.equipment[i].type) {
+                        case "head":   render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14 + i * 20); break;
+                        case "body":   render.drawImage(gamedata.sprites["_armor_body.png"], 99, 14 + i * 20); break;
+                        case "arm":    render.drawImage(gamedata.sprites["_armor_arm.png"],  99, 14 + i * 20); break;
+                        case "weapon": render.drawImage(gamedata.sprites["_weapon.png"],     99, 14 + i * 20); break;
+                    }
+                    drawString(state.equipment[i].display_name, 120, 26 + i * 20);
+                }
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+        }
     }
 
     // process all procedures
@@ -205,7 +240,7 @@ function onKeyDown(keyevent) {
         case "ArrowDown": input.down = true; input.justDown = true; break;
         case "ArrowLeft": input.left = true; break;
         case " ":
-            if (state.can_move_in_map) {
+            if (state.mapCanMove) {
 
                 // first check if we're close enough to any actor to interact with them
                 for (const actor of state.actors) {
@@ -229,16 +264,16 @@ function onKeyDown(keyevent) {
             }
             break;
         case "Escape":
-            if (state.can_move_in_map) {
+            if (state.mapCanMove) {
 
-                state.can_move_in_map = false;
-                state.showing_menu = true;
-                state.menu_page = 0;
+                state.mapCanMove = false;
+                state.menuShowing = true;
+                state.menuPage = 0;
 
-            } else if (state.showing_menu) {
+            } else if (state.menuShowing) {
 
-                state.can_move_in_map = true;
-                state.showing_menu = false;
+                state.mapCanMove = true;
+                state.menuShowing = false;
             }
             break;
     }
