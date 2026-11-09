@@ -26,6 +26,9 @@ const func = {
     changeRoom
 };
 
+// TODO just needs an inventory menu, a party menu (not necessarily a full party system yet, but you should be able to
+// equip stuff on your main guy), and a combat system and that's basically the engine done
+
 // TODO add auxilliary function for adding + removing (errors on trying to remove sole member) partymembers (directly modifying the state.IDK variable is discouraged)
 // TODO changing to a room should make a deep copy of its tile data so we can implement an aux function for setting tiles (all changes cleared when leaving!)
 // maybe I should just trust the programmer to not modify stuff that probably shouldn't be modified, like inputs, the party (without a setter), etc
@@ -368,6 +371,8 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
         }
     }
     drawUIBox(3, 137, 250, 52, text.substring(0, LOCAL._typewriter_i));
+    if (LOCAL._typewriter_i == text.length)
+        drawString(">", 242, 185, "yellow");
 
     if (speaker == "left") {
 
@@ -387,6 +392,7 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
 
     // progress dialogue tree
     if (input.continue) {
+
         LOCAL._i++;
         delete LOCAL._typewriter_i;
         delete LOCAL._typewriter_timer;

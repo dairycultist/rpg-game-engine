@@ -11,7 +11,7 @@
     <script>
         // get the browser to load all the images
         for (key of Object.keys(gamedata.sprites))
-            document.write(`<img src="${ key }" id="${ key }" style="display: none;">`); 
+            document.write(`<img src="res/${ key }" id="${ key }" style="display: none;">`); 
     </script>
 
     <canvas id="canvas" width="256" height="192" style="height: 100vh; margin: 0; image-rendering: pixelated;"></canvas>
