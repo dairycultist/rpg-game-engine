@@ -3,6 +3,8 @@ const global_procvars = {};
 const state = {
     roomID: "", // directly modifying the state.roomID variable is discouraged
     can_move_in_map: true,
+    showing_menu: false,
+    menu_page: 0,
     playerActor: null,
     actors: []
 };
@@ -141,6 +143,24 @@ function update() {
     // draw the map
     drawMap();
 
+    // draw/process the menu
+    if (state.showing_menu) {
+
+        // process
+        state.menu_page = upDownSelect(state.menu_page, 4);
+
+        // draw
+        const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
+
+        drawUIBox(8, 8, 80, 176);
+        drawUIBox(92, 8, 156, 176);
+
+        drawString("Party", 15, 26, state.menu_page == 0 ? "yellow" : "white");
+        drawString("Equipment", 15, 26 + fontHeight, state.menu_page == 1 ? "yellow" : "white");
+        drawString("Items", 15, 26 + fontHeight * 2, state.menu_page == 2 ? "yellow" : "white");
+        drawString("Key Items", 15, 26 + fontHeight * 3, state.menu_page == 3 ? "yellow" : "white");
+    }
+
     // process all procedures
     for (let i = 0; i < procedures.length; i++) {
 
@@ -177,36 +197,49 @@ function onKeyUp(keyevent) {
 
 function onKeyDown(keyevent) {
 
-        switch (keyevent.key) {
-            case "ArrowUp": input.up = true; input.justUp = true; break;
-            case "ArrowRight": input.right = true; break;
-            case "ArrowDown": input.down = true; input.justDown = true; break;
-            case "ArrowLeft": input.left = true; break;
-            case " ":
-                if (state.can_move_in_map) {
+    switch (keyevent.key) {
+        case "ArrowUp": input.up = true; input.justUp = true; break;
+        case "ArrowRight": input.right = true; break;
+        case "ArrowDown": input.down = true; input.justDown = true; break;
+        case "ArrowLeft": input.left = true; break;
+        case " ":
+            if (state.can_move_in_map) {
 
-                    // first check if we're close enough to any actor to interact with them
-                    for (const actor of state.actors) {
+                // first check if we're close enough to any actor to interact with them
+                for (const actor of state.actors) {
 
-                        if (actor == state.playerActor)
-                            continue;
+                    if (actor == state.playerActor)
+                        continue;
 
-                        if (Math.abs(actor.x - state.playerActor.x) < 1.5 && Math.abs(actor.y - state.playerActor.y) < 1.5) {
+                    if (Math.abs(actor.x - state.playerActor.x) < 1.5 && Math.abs(actor.y - state.playerActor.y) < 1.5) {
 
-                            triggerProcedure(actor.onInteract, { _actor: actor });
-                            break;
-                        }
+                        triggerProcedure(actor.onInteract, { _actor: actor });
+                        break;
                     }
-
-                    // just interact generically with the map
-                    if (gamedata.rooms[state.roomID].onMapInteract)
-                        triggerProcedure(gamedata.rooms[state.roomID].onMapInteract);
-
-                } else {
-                    input.continue = true;
                 }
-                break;
-        }
+
+                // just interact generically with the map
+                if (gamedata.rooms[state.roomID].onMapInteract)
+                    triggerProcedure(gamedata.rooms[state.roomID].onMapInteract);
+
+            } else {
+                input.continue = true;
+            }
+            break;
+        case "Escape":
+            if (state.can_move_in_map) {
+
+                state.can_move_in_map = false;
+                state.showing_menu = true;
+                state.menu_page = 0;
+
+            } else if (state.showing_menu) {
+
+                state.can_move_in_map = true;
+                state.showing_menu = false;
+            }
+            break;
+    }
 }
 
 function triggerProcedure(procedure, local_init = {}) {
@@ -422,18 +455,7 @@ function showChoice(LOCAL, choices = ["a", "b"]) {
         LOCAL._selected_i = 0;
 
     // selection logic
-    if (input.justUp != input.justDown) {
-
-        if (input.justUp)
-            LOCAL._selected_i--;
-        else
-            LOCAL._selected_i++;
-
-        if (LOCAL._selected_i < 0)
-            LOCAL._selected_i = choices.length - 1;
-        else if (LOCAL._selected_i >= choices.length)
-            LOCAL._selected_i = 0;
-    }
+    LOCAL._selected_i = upDownSelect(LOCAL._selected_i, choices.length);
 
     // draw choice box
     const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
@@ -543,4 +565,23 @@ function drawCharacterTalkSprite(characterID, isOnRight = false, isActive = true
 
         render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
     }
+}
+
+// takes in the index you want to use for selecting, and returns the new value based on input
+function upDownSelect(index, count) {
+
+    if (input.justUp != input.justDown) {
+
+        if (input.justUp)
+            index--;
+        else
+            index++;
+
+        if (index < 0)
+            index = count - 1;
+        else if (index >= count)
+            index = 0;
+    }
+
+    return index;
 }
