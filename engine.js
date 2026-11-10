@@ -53,7 +53,7 @@ function start() {
         gamedata.sprites[key] = document.getElementById(key);
 
     // initialize renderer
-    initRenderer(gamedata.font, gamedata.fontSize);
+    Renderer.init(gamedata.font, gamedata.fontSize);
 
     // start update loop
     setInterval(update, 1000 / 60);
@@ -67,7 +67,7 @@ function update() {
 
     if (error) {
 
-        drawString(error, 0, 40, "red");
+        Renderer.drawString(error, 0, 40, "red");
         error = " ";
         return;
     }
@@ -124,7 +124,7 @@ function update() {
     }
 
     // clear
-    clearScreen();
+    Renderer.clearScreen();
 
     // draw the map
     drawMap();
@@ -137,10 +137,10 @@ function update() {
             state.menuPage = upDownSelect(state.menuPage, 4);
 
         // draw
-        drawUIBox(8, 8, 80, 176);
-        // drawUIBox(92, 8, 156, 176);
-        drawUIBox(92, 8, 156, 120);
-        drawUIBox(92, 132, 156, 52);
+        Renderer.drawUIBox(8, 8, 80, 176);
+        // Renderer.drawUIBox(92, 8, 156, 176);
+        Renderer.drawUIBox(92, 8, 156, 120);
+        Renderer.drawUIBox(92, 132, 156, 52);
 
         if (state.currAction == "menu1") {
             render.drawImage(gamedata.sprites["_pointer.png"], -4, 14 + state.menuPage * fontHeight);
@@ -148,10 +148,10 @@ function update() {
             render.drawImage(gamedata.sprites["_pointer.png"], 80, 14);
         }
 
-        drawString("Items", 15, 26, state.menuPage == 0 ? "yellow" : "white");
-        drawString("Key Items", 15, 26 + fontHeight, state.menuPage == 1 ? "yellow" : "white");
-        drawString("Equipment", 15, 26 + fontHeight * 2, state.menuPage == 2 ? "yellow" : "white");
-        drawString("YOU", 15, 26 + fontHeight * 3, state.menuPage == 3 ? "yellow" : "white");
+        Renderer.drawString("Items", 15, 26, state.menuPage == 0 ? "yellow" : "white");
+        Renderer.drawString("Key Items", 15, 26 + fontHeight, state.menuPage == 1 ? "yellow" : "white");
+        Renderer.drawString("Equipment", 15, 26 + fontHeight * 2, state.menuPage == 2 ? "yellow" : "white");
+        Renderer.drawString("YOU", 15, 26 + fontHeight * 3, state.menuPage == 3 ? "yellow" : "white");
         // TODO list all the party members, maybe separated slightly from the other pages?
 
         // draw page content
@@ -170,18 +170,18 @@ function update() {
                         case "arm":    render.drawImage(gamedata.sprites["_armor_arm.png"],  99, 14 + i * 20); break;
                         case "weapon": render.drawImage(gamedata.sprites["_weapon.png"],     99, 14 + i * 20); break;
                     }
-                    drawString(state.equipment[i].display_name, 120, 26 + i * 20);
+                    Renderer.drawString(state.equipment[i].display_name, 120, 26 + i * 20);
                 }
                 break;
             case 3:
                 render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14);
-                drawString("---", 120, 26, "gray");
+                Renderer.drawString("---", 120, 26, "gray");
                 render.drawImage(gamedata.sprites["_armor_body.png"], 99, 34);
-                drawString("---", 120, 46, "gray");
+                Renderer.drawString("---", 120, 46, "gray");
                 render.drawImage(gamedata.sprites["_armor_arm.png"], 99, 54);
-                drawString("---", 120, 66, "gray");
+                Renderer.drawString("---", 120, 66, "gray");
                 render.drawImage(gamedata.sprites["_weapon.png"], 99, 74);
-                drawString("---", 120, 86, "gray");
+                Renderer.drawString("---", 120, 86, "gray");
                 break;
         }
     }
@@ -407,7 +407,7 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
             return;
         }
 
-        drawCharacterTalkSprite(leftCharacterID, false, speaker == "left");
+        Renderer.drawCharacterTalkSprite(leftCharacterID, false, speaker == "left");
     }
 
     if (rightCharacterID) {
@@ -418,7 +418,7 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
             return;
         }
 
-        drawCharacterTalkSprite(rightCharacterID, true, speaker == "right");
+        Renderer.drawCharacterTalkSprite(rightCharacterID, true, speaker == "right");
     }
 
     // the dialoguebox stuff
@@ -432,7 +432,7 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
             LOCAL._typewriter_i++;
         }
     }
-    drawUIBox(3, 137, 250, 52, text.substring(0, LOCAL._typewriter_i));
+    Renderer.drawUIBox(3, 137, 250, 52, text.substring(0, LOCAL._typewriter_i));
 
     // pointer indicating the dialogue is done
     if (LOCAL._typewriter_i == text.length) {
@@ -443,11 +443,11 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
     // speaker title
     if (speaker == "left") {
 
-        drawUIBoxFitText(3, 114, gamedata.characters[leftCharacterID].display_name);
+        Renderer.drawUIBoxFitText(3, 114, gamedata.characters[leftCharacterID].display_name);
 
     } else if (speaker == "right") {
 
-        drawUIBoxFitText(253, 114, gamedata.characters[rightCharacterID].display_name, true);
+        Renderer.drawUIBoxFitText(253, 114, gamedata.characters[rightCharacterID].display_name, true);
     }
 
     if (input.continue) {
@@ -495,15 +495,15 @@ function showChoice(LOCAL, choices = ["a", "b"]) {
     LOCAL._selected_i = upDownSelect(LOCAL._selected_i, choices.length);
 
     // draw choice box
-    drawUIBox(3, 137, 250, 52);
+    Renderer.drawUIBox(3, 137, 250, 52);
 
     render.drawImage(gamedata.sprites["_pointer.png"], 11, 156);
 
     if (LOCAL._selected_i > 0)
-        drawString(choices[LOCAL._selected_i - 1], 30, 155);
-    drawString(choices[LOCAL._selected_i], 30, 155 + fontHeight, "yellow");
+        Renderer.drawString(choices[LOCAL._selected_i - 1], 30, 155);
+    Renderer.drawString(choices[LOCAL._selected_i], 30, 155 + fontHeight, "yellow");
     if (LOCAL._selected_i < choices.length - 1)
-        drawString(choices[LOCAL._selected_i + 1], 30, 155 + fontHeight * 2);
+        Renderer.drawString(choices[LOCAL._selected_i + 1], 30, 155 + fontHeight * 2);
 
     // progress dialogue tree
     if (input.continue) {
@@ -528,10 +528,10 @@ function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
     // TODO takes in item objects instead of strings
     // TODO show item description + price
 
-    drawUIBoxFitText(3, 114, "$67");
+    Renderer.drawUIBoxFitText(3, 114, "$67");
 
     if (shopkeepCharacterID)
-        drawCharacterTalkSprite(shopkeepCharacterID, true);
+        Renderer.drawCharacterTalkSprite(shopkeepCharacterID, true);
 
     choices.unshift("<back>");
 

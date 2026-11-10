@@ -1,104 +1,106 @@
-let render;
-let fontHeight;
-let defaultFont;
+const Renderer = {
 
-function initRenderer(fontPath, fontSize) {
+    render: null,
+    fontHeight: 0,
+    defaultFont: null,
 
-    render = document.getElementById("canvas").getContext("2d");
+    init(fontPath, fontSize) {
 
-    defaultFont = fontSize + "px DefaultFont";
+        render = document.getElementById("canvas").getContext("2d");
 
-    // load font
-    new FontFace("DefaultFont", "url(res/" + fontPath + ")").load().then((font) => {
+        defaultFont = fontSize + "px DefaultFont";
 
-        document.fonts.add(font);
+        // load font
+        new FontFace("DefaultFont", "url(res/" + fontPath + ")").load().then((font) => {
+
+            document.fonts.add(font);
+
+            render.font = defaultFont;
+            fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
+
+        }).catch((err) => {
+            error = `Font ${ fontPath } is invalid!`;
+            return;
+        });
+    },
+    
+    clearScreen() {
+
+        render.fillStyle = "black";
+        render.fillRect(0, 0, 256, 192);
+    },
+
+    drawUIBox(x, y, w, h, string = "") {
+
+        render.fillStyle = "black";
+        render.lineWidth = "2";
+        render.strokeStyle = "white";
+
+        render.fillRect(x, y, w, h);
+        render.strokeRect(x + 1, y + 1, w - 2, h - 2);
+
+        if (string)
+            Renderer.drawString(string, x + 7, y + 18, "white", w - 14);
+    },
+
+    drawUIBoxFitText(x, y, text, isRightJustified = false) {
 
         render.font = defaultFont;
+        const width = Math.floor(render.measureText(text).width) + 15;
 
-        fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
+        if (isRightJustified)
+            x -= width;
 
-    }).catch((err) => {
-        error = `Font ${ fontPath } is invalid!`;
-        return;
-    });
-}
+        Renderer.drawUIBox(x, y, width, 25, text);
+    },
 
-function clearScreen() {
+    drawString(string, x, y, color = "white", maxWidth = Infinity) {
 
-    render.fillStyle = "black";
-    render.fillRect(0, 0, 256, 192);
-}
+        const spaceWidth = Math.floor(render.measureText(" ").width);
 
-function drawUIBox(x, y, w, h, string = "") {
+        render.fillStyle = color;
+        render.font = defaultFont;
 
-    render.fillStyle = "black";
-    render.lineWidth = "2";
-    render.strokeStyle = "white";
+        let charX = x;
+        let charY = y;
 
-    render.fillRect(x, y, w, h);
-    render.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        let words = string.split(" ");
 
-    if (string)
-        drawString(string, x + 7, y + 18, "white", w - 14);
-}
+        for (let word of words) {
 
-function drawUIBoxFitText(x, y, text, isRightJustified = false) {
+            if (charX - x + render.measureText(word).width > maxWidth) {
+                charX = x;
+                charY += fontHeight;
+            }
 
-    render.font = defaultFont;
-    const width = Math.floor(render.measureText(text).width) + 15;
+            for (const char of word) {
+                render.fillText(char, charX, charY);
+                charX += Math.floor(render.measureText(char).width);
+            }
 
-    if (isRightJustified)
-        x -= width;
+            charX += spaceWidth;
+        }
+    },
 
-    drawUIBox(x, y, width, 25, text);
-}
+    drawCharacterTalkSprite(characterID, isOnRight = false, isActive = true) {
 
-function drawString(string, x, y, color = "white", maxWidth = Infinity) {
+        render.filter = isActive ? "none" : "brightness(80%)";
 
-    const spaceWidth = Math.floor(render.measureText(" ").width);
+        const image = gamedata.sprites[gamedata.characters[characterID].talk_sprites["DEFAULT"]];
 
-    render.fillStyle = color;
-    render.font = defaultFont;
+        if (isOnRight) {
 
-    let charX = x;
-    let charY = y;
+            render.save();
+            render.translate(256, 0);
+            render.scale(-1, 1);
+            render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
+            render.restore();
 
-    let words = string.split(" ");
+        } else {
 
-    for (let word of words) {
-
-        if (charX - x + render.measureText(word).width > maxWidth) {
-            charX = x;
-            charY += fontHeight;
+            render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
         }
 
-        for (const char of word) {
-            render.fillText(char, charX, charY);
-            charX += Math.floor(render.measureText(char).width);
-        }
-
-        charX += spaceWidth;
+        render.filter = "none";
     }
-}
-
-function drawCharacterTalkSprite(characterID, isOnRight = false, isActive = true) {
-
-    render.filter = isActive ? "none" : "brightness(80%)";
-
-    const image = gamedata.sprites[gamedata.characters[characterID].talk_sprites["DEFAULT"]];
-
-    if (isOnRight) {
-
-        render.save();
-        render.translate(256, 0);
-        render.scale(-1, 1);
-        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
-        render.restore();
-
-    } else {
-
-        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
-    }
-
-    render.filter = "none";
-}
+};
