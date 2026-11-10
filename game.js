@@ -135,7 +135,7 @@ const gamedata = {
                         func.triggerProcedure({
                             init(GLOBAL, LOCAL, input, state, func) {
 
-                                state.currAction = "chatting";
+                                state.currAction = "mapNoInput";
                             },
                             frame(GLOBAL, LOCAL, input, state, func) {
 
@@ -167,7 +167,7 @@ const gamedata = {
 
                         init(GLOBAL, LOCAL, input, state, func) {
                             
-                            state.currAction = "chatting";
+                            state.currAction = "mapNoInput";
                             LOCAL._actor.lookAt(state.playerActor);
                             state.playerActor.lookAt(LOCAL._actor);
                         },
@@ -204,7 +204,7 @@ const gamedata = {
                         return;
                     }
 
-                    state.currAction = "chatting";
+                    state.currAction = "mapNoInput";
                 },
                 frame(GLOBAL, LOCAL, input, state, func) {
 

@@ -2,8 +2,6 @@ const global_procvars = {};
 
 let procedures = [];
 
-let render;
-
 let error = null;
 
 const input = {
@@ -27,17 +25,12 @@ const func = {
 
 const state = {
     roomID: "", // directly modifying the state.roomID variable is discouraged
-    currAction: "map", // [map, chatting, menu1, menu2]
+    currAction: "map", // [map, mapNoInput, menu1, menu2]
     menuPage: 0,
     playerActor: null,
     equipment: [],
     actors: []
 };
-
-// initialize state
-state.playerActor = spawnActor(gamedata.init.playerCharacterID, 0.0, 0.0);
-state.equipment = gamedata.init.equipment;
-changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
 // TODO just needs an inventory menu, a party menu (not necessarily a full party system yet, but you should be able to
 // equip stuff on your main guy), and a combat system and that's basically the engine done
@@ -48,24 +41,19 @@ changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
 let anim_t = 0;
 
-const DEFAULT_FONT = gamedata.fontSize + "px DefaultFont";
-
 function start() {
+
+    // initialize state
+    state.playerActor = spawnActor(gamedata.init.playerCharacterID, 0.0, 0.0);
+    state.equipment = gamedata.init.equipment;
+    changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
     // gather all images from the DOM into the gamedata
     for (key of Object.keys(gamedata.sprites))
         gamedata.sprites[key] = document.getElementById(key);
 
-    // initialize font
-    new FontFace("DefaultFont", "url(res/" + gamedata.font + ")").load().then((font) => {
-        document.fonts.add(font);
-    }).catch((err) => {
-        error = `Font ${ gamedata.font } is invalid!`;
-        return;
-    });
-
     // initialize renderer
-    render = document.getElementById("canvas").getContext("2d");
+    initRenderer(gamedata.font, gamedata.fontSize);
 
     // start update loop
     setInterval(update, 1000 / 60);
@@ -79,9 +67,7 @@ function update() {
 
     if (error) {
 
-        render.fillStyle = "red";
-        render.font = DEFAULT_FONT;
-        render.fillText(error, 0, 40);
+        drawString(error, 0, 40, "red");
         error = " ";
         return;
     }
@@ -138,8 +124,7 @@ function update() {
     }
 
     // clear
-    render.fillStyle = "black";
-    render.fillRect(0, 0, 256, 192);
+    clearScreen();
 
     // draw the map
     drawMap();
@@ -152,8 +137,6 @@ function update() {
             state.menuPage = upDownSelect(state.menuPage, 4);
 
         // draw
-        const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
-
         drawUIBox(8, 8, 80, 176);
         // drawUIBox(92, 8, 156, 176);
         drawUIBox(92, 8, 156, 120);
@@ -438,8 +421,6 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
         drawCharacterTalkSprite(rightCharacterID, true, speaker == "right");
     }
 
-    render.filter = "none";
-
     // the dialoguebox stuff
     if (LOCAL._typewriter_i < text.length) {
 
@@ -462,18 +443,11 @@ function showDialogue(LOCAL, text, leftCharacterID = "", rightCharacterID = "", 
     // speaker title
     if (speaker == "left") {
 
-        render.font = DEFAULT_FONT;
-        const nameplate_width = Math.floor(render.measureText(gamedata.characters[leftCharacterID].display_name).width + 13);
-
-        drawUIBox(3, 114, nameplate_width, 25);
-        drawString(gamedata.characters[leftCharacterID].display_name, 9, 131);
+        drawUIBoxFitText(3, 114, gamedata.characters[leftCharacterID].display_name);
 
     } else if (speaker == "right") {
 
-        const nameplate_width = Math.floor(render.measureText(gamedata.characters[rightCharacterID].display_name).width + 13);
-
-        drawUIBox(253 - nameplate_width, 114, nameplate_width, 25);
-        drawString(gamedata.characters[rightCharacterID].display_name, 259 - nameplate_width, 131);
+        drawUIBoxFitText(253, 114, gamedata.characters[rightCharacterID].display_name, true);
     }
 
     if (input.continue) {
@@ -521,8 +495,6 @@ function showChoice(LOCAL, choices = ["a", "b"]) {
     LOCAL._selected_i = upDownSelect(LOCAL._selected_i, choices.length);
 
     // draw choice box
-    const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
-
     drawUIBox(3, 137, 250, 52);
 
     render.drawImage(gamedata.sprites["_pointer.png"], 11, 156);
@@ -556,11 +528,7 @@ function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
     // TODO takes in item objects instead of strings
     // TODO show item description + price
 
-    render.font = DEFAULT_FONT;
-    const nameplate_width = Math.floor(render.measureText("$67").width + 13);
-
-    drawUIBox(3, 114, nameplate_width, 25);
-    drawString("$67", 9, 131);
+    drawUIBoxFitText(3, 114, "$67");
 
     if (shopkeepCharacterID)
         drawCharacterTalkSprite(shopkeepCharacterID, true);
@@ -569,68 +537,6 @@ function showShop(LOCAL, choices = ["a", "b"], shopkeepCharacterID = null) {
 
     const hold = showChoice(LOCAL, choices);
     return Number.isInteger(hold) ? hold - 1 : null;
-}
-
-function drawUIBox(x, y, w, h, string = "") {
-
-    render.fillStyle = "black";
-    render.lineWidth = "2";
-    render.strokeStyle = "white";
-
-    render.fillRect(x, y, w, h);
-    render.strokeRect(x + 1, y + 1, w - 2, h - 2);
-
-    if (string)
-        drawString(string, x + 7, y + 18, "white", w - 14);
-}
-
-function drawString(string, x, y, color = "white", maxWidth = Infinity) {
-
-    const fontHeight = Math.floor(render.measureText("l").fontBoundingBoxAscent);
-    const spaceWidth = Math.floor(render.measureText(" ").width);
-
-    render.fillStyle = color;
-    render.font = DEFAULT_FONT;
-
-    let charX = x;
-    let charY = y;
-
-    let words = string.split(" ");
-
-    for (let word of words) {
-
-        if (charX - x + render.measureText(word).width > maxWidth) {
-            charX = x;
-            charY += fontHeight;
-        }
-
-        for (const char of word) {
-            render.fillText(char, charX, charY);
-            charX += Math.floor(render.measureText(char).width);
-        }
-
-        charX += spaceWidth;
-    }
-}
-
-function drawCharacterTalkSprite(characterID, isOnRight = false, isActive = true) {
-
-    render.filter = isActive ? "none" : "brightness(80%)";
-
-    const image = gamedata.sprites[gamedata.characters[characterID].talk_sprites["DEFAULT"]];
-
-    if (isOnRight) {
-
-        render.save();
-        render.translate(256, 0);
-        render.scale(-1, 1);
-        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
-        render.restore();
-
-    } else {
-
-        render.drawImage(image, 0, 0, image.width, image.height, 3, 9, 128, 128);
-    }
 }
 
 // takes in the index you want to use for selecting, and returns the new value based on input

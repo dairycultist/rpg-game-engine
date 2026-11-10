@@ -3,8 +3,8 @@
 fixed screen resolution (16x12 tiles / 256x192 pixels)
 
 The game engine will allow you to:
-- Easily edit a `game.js` file. This contains both the data and code of your game.
-- Export a `build.zip` containing the `game.js`, all relevant resources (images, fonts, sounds, etc), an `engine.js`, and an `index.html` file that runs the game.
+- Easily edit a `game.js` file. This contains both the data (besides images, fonts, and audio files) and code of your game.
+- Export a `build.zip` containing all the files of your game, most notably an `index.html` file that runs the game.
 
 I wanna tell stories! I wanna make worlds! I wanna flesh out unique characters and write interpersonal interactions!
 
