@@ -25,8 +25,9 @@ const func = {
 
 const state = {
     roomID: "", // directly modifying the state.roomID variable is discouraged
-    currAction: "map", // [map, mapNoInput, menu1, menu2]
+    currAction: "map", // [map, mapNoInput, menu1, menu2, battle, battleNoInput]
     menuPage: 0,
+    menuItem: -1,
     playerActor: null,
     equipment: [],
     actors: []
@@ -126,64 +127,42 @@ function update() {
     // clear
     Renderer.clearScreen();
 
-    // draw the map
-    drawMap();
+    if (state.currAction == "map" || state.currAction == "mapNoInput" || state.currAction == "menu1" || state.currAction == "menu2") {
+        
+        // draw the map
+        drawMap();
 
-    // draw/process the menu
-    if (state.currAction == "menu1" || state.currAction == "menu2") {
+        // draw/process the menu
+        if (state.currAction == "menu1" || state.currAction == "menu2") {
 
-        // process
-        if (state.currAction == "menu1")
-            state.menuPage = upDownSelect(state.menuPage, 4);
+            // draw boxes
+            Renderer.drawUIBox(8, 8, 80, 176);
 
-        // draw
-        Renderer.drawUIBox(8, 8, 80, 176);
-        // Renderer.drawUIBox(92, 8, 156, 176);
-        Renderer.drawUIBox(92, 8, 156, 120);
-        Renderer.drawUIBox(92, 132, 156, 52);
+            // draw page titles
+            Renderer.drawString("Items", 15, 26, state.menuPage == 0 ? "yellow" : "white");
+            Renderer.drawString("Key Items", 15, 26 + fontHeight, state.menuPage == 1 ? "yellow" : "white");
+            Renderer.drawString("Equipment", 15, 26 + fontHeight * 2, state.menuPage == 2 ? "yellow" : "white");
+            Renderer.drawString("YOU", 15, 26 + fontHeight * 3, state.menuPage == 3 ? "yellow" : "white");
+            // TODO list all the party members, maybe separated slightly from the other pages?
 
-        if (state.currAction == "menu1") {
-            render.drawImage(gamedata.sprites["_pointer.png"], -4, 14 + state.menuPage * fontHeight);
-        } else {
-            render.drawImage(gamedata.sprites["_pointer.png"], 80, 14);
+            if (state.currAction == "menu1") {
+
+                // draw pointer
+                render.drawImage(gamedata.sprites["_pointer.png"], -4, 14 + state.menuPage * fontHeight);
+
+                state.menuPage = upDownSelect(state.menuPage, 4);
+            }
+
+            switch (state.menuPage) {
+                case 0: Renderer.drawUIBox(92, 8, 156, 176); break;
+                case 1: Renderer.drawUIBox(92, 8, 156, 176); break;
+                case 2: showMenuPageEquipment(state.currAction == "menu2"); break;
+                case 3: showMenuPageYOU(state.currAction == "menu2"); break;
+            }
         }
 
-        Renderer.drawString("Items", 15, 26, state.menuPage == 0 ? "yellow" : "white");
-        Renderer.drawString("Key Items", 15, 26 + fontHeight, state.menuPage == 1 ? "yellow" : "white");
-        Renderer.drawString("Equipment", 15, 26 + fontHeight * 2, state.menuPage == 2 ? "yellow" : "white");
-        Renderer.drawString("YOU", 15, 26 + fontHeight * 3, state.menuPage == 3 ? "yellow" : "white");
-        // TODO list all the party members, maybe separated slightly from the other pages?
+    } else if (state.currAction == "battle" || state.currAction == "battleNoInput") {
 
-        // draw page content
-        switch (state.menuPage) {
-
-            case 0:
-                break;
-            case 1:
-                break;
-            case 2:
-                for (let i = 0; i < state.equipment.length; i++) {
-
-                    switch (state.equipment[i].type) {
-                        case "head":   render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14 + i * 20); break;
-                        case "body":   render.drawImage(gamedata.sprites["_armor_body.png"], 99, 14 + i * 20); break;
-                        case "arm":    render.drawImage(gamedata.sprites["_armor_arm.png"],  99, 14 + i * 20); break;
-                        case "weapon": render.drawImage(gamedata.sprites["_weapon.png"],     99, 14 + i * 20); break;
-                    }
-                    Renderer.drawString(state.equipment[i].display_name, 120, 26 + i * 20);
-                }
-                break;
-            case 3:
-                render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14);
-                Renderer.drawString("---", 120, 26, "gray");
-                render.drawImage(gamedata.sprites["_armor_body.png"], 99, 34);
-                Renderer.drawString("---", 120, 46, "gray");
-                render.drawImage(gamedata.sprites["_armor_arm.png"], 99, 54);
-                Renderer.drawString("---", 120, 66, "gray");
-                render.drawImage(gamedata.sprites["_weapon.png"], 99, 74);
-                Renderer.drawString("---", 120, 86, "gray");
-                break;
-        }
     }
 
     // process all procedures
@@ -250,6 +229,7 @@ function onKeyDown(keyevent) {
                     break;
                 case "menu1":
                     state.currAction = "menu2";
+                    state.menuItem = 0;
                     break;
                 default:
                     input.continue = true;
@@ -267,6 +247,7 @@ function onKeyDown(keyevent) {
                     break;
                 case "menu2":
                     state.currAction = "menu1";
+                    state.menuItem = -1;
                     break;
             }
             break;
@@ -377,6 +358,54 @@ function drawMap() {
             Math.floor(actor.x * 16.0 - image.width / 2.0),
             Math.floor(actor.y * 16.0) - image.height
         );
+    }
+}
+
+/* 
+ */
+function showMenuPageEquipment(hasControl = false) {
+
+    Renderer.drawUIBox(92, 8, 156, 120);
+    Renderer.drawUIBox(92, 132, 156, 52);
+
+    for (let i = 0; i < state.equipment.length; i++) {
+
+        switch (state.equipment[i].type) {
+            case "head":   render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14 + i * 20); break;
+            case "body":   render.drawImage(gamedata.sprites["_armor_body.png"], 99, 14 + i * 20); break;
+            case "arm":    render.drawImage(gamedata.sprites["_armor_arm.png"],  99, 14 + i * 20); break;
+            case "weapon": render.drawImage(gamedata.sprites["_weapon.png"],     99, 14 + i * 20); break;
+        }
+        Renderer.drawString(state.equipment[i].display_name, 120, 26 + i * 20);
+    }
+
+    if (hasControl) {
+
+        state.menuItem = upDownSelect(state.menuItem, state.equipment.length);
+        render.drawImage(gamedata.sprites["_pointer.png"], 80, 14 + state.menuItem * 20);
+    }
+}
+
+/* 
+ */
+function showMenuPageYOU(hasControl = false) { // TODO probably rename to showMenuPageCharacter
+
+    Renderer.drawUIBox(92, 8, 156, 120);
+    Renderer.drawUIBox(92, 132, 156, 52);
+
+    render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14);
+    Renderer.drawString("---", 120, 26, "gray");
+    render.drawImage(gamedata.sprites["_armor_body.png"], 99, 34);
+    Renderer.drawString("---", 120, 46, "gray");
+    render.drawImage(gamedata.sprites["_armor_arm.png"], 99, 54);
+    Renderer.drawString("---", 120, 66, "gray");
+    render.drawImage(gamedata.sprites["_weapon.png"], 99, 74);
+    Renderer.drawString("---", 120, 86, "gray");
+
+    if (hasControl) {
+
+        state.menuItem = upDownSelect(state.menuItem, 4);
+        render.drawImage(gamedata.sprites["_pointer.png"], 80, 14 + state.menuItem * 20);
     }
 }
 
