@@ -4,7 +4,24 @@ const gamedata = {
         room: "bedroom",
         playerX: 4.0,
         playerY: 4.0,
-        equipment: [
+        // all types of items follow the same structure. the type determines its symbol and what to display in its infobox
+        // TODO icon override?
+        consumableItems: [
+            {
+                display_name: "Pizza",
+                type: "consumable", // [consumable]
+                lore: "It tastes like oil."
+                // TODO a function for its effect? or just plain stats. I dunno how much control I wanna fork over
+            }
+        ],
+        keyItems: [
+            {
+                display_name: "Moldy Pizza",
+                type: "key", // [key]
+                lore: "It is said that, if you stay past dark, the animatronics come to life and eat people like PIZZA..."
+            }
+        ],
+        equipmentItems: [
             {
                 display_name: "Freddy Mask",
                 type: "head", // [head, body, arm (bracelet, shield, whatever), weapon]
@@ -45,6 +62,8 @@ const gamedata = {
     sprites: {
         // reserved
         "_pointer.png": null,
+        "_consumable.png": null,
+        "_key.png": null,
         "_armor_head.png": null,
         "_armor_body.png": null,
         "_armor_arm.png": null,

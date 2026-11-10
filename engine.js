@@ -29,7 +29,9 @@ const state = {
     menuPage: 0,
     menuItem: -1,
     playerActor: null,
-    equipment: [],
+    consumableItems: [],
+    keyItems: [],
+    equipmentItems: [],
     actors: []
 };
 
@@ -46,7 +48,9 @@ function start() {
 
     // initialize state
     state.playerActor = spawnActor(gamedata.init.playerCharacterID, 0.0, 0.0);
-    state.equipment = gamedata.init.equipment;
+    state.consumableItems = gamedata.init.consumableItems;
+    state.keyItems        = gamedata.init.keyItems;
+    state.equipmentItems  = gamedata.init.equipmentItems;
     changeRoom(gamedata.init.room, gamedata.init.playerX, gamedata.init.playerY);
 
     // gather all images from the DOM into the gamedata
@@ -155,9 +159,9 @@ function update() {
             }
 
             switch (state.menuPage) {
-                case 0: showMenuPageItems([], state.currAction == "menu2"); break;
-                case 1: showMenuPageItems([], state.currAction == "menu2"); break;
-                case 2: showMenuPageItems(state.equipment, state.currAction == "menu2"); break;
+                case 0: showMenuPageItems(state.consumableItems, state.currAction == "menu2"); break;
+                case 1: showMenuPageItems(state.keyItems, state.currAction == "menu2"); break;
+                case 2: showMenuPageItems(state.equipmentItems, state.currAction == "menu2"); break;
                 case 3: showMenuPageYOU(state.currAction == "menu2"); break;
             }
         }
@@ -367,10 +371,10 @@ function drawMap() {
 function showMenuPageItems(items, hasControl = false) {
 
     Renderer.drawUIBox(92, 8, 156, 120);
-    Renderer.drawUIBox(92, 132, 156, 52);
 
     if (items.length == 0) {
 
+        Renderer.drawUIBox(92, 132, 156, 52);
         Renderer.drawString("Nothing here!", 99, 26, "grey");
 
         if (hasControl)
@@ -378,13 +382,17 @@ function showMenuPageItems(items, hasControl = false) {
 
     } else {
 
+        Renderer.drawUIBox(92, 132, 156, 52, hasControl ? items[state.menuItem].lore || undefined : undefined);
+
         for (let i = 0; i < items.length; i++) {
 
             switch (items[i].type) {
-                case "head":   render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14 + i * 20); break;
-                case "body":   render.drawImage(gamedata.sprites["_armor_body.png"], 99, 14 + i * 20); break;
-                case "arm":    render.drawImage(gamedata.sprites["_armor_arm.png"],  99, 14 + i * 20); break;
-                case "weapon": render.drawImage(gamedata.sprites["_weapon.png"],     99, 14 + i * 20); break;
+                case "head":       render.drawImage(gamedata.sprites["_armor_head.png"], 99, 14 + i * 20); break;
+                case "body":       render.drawImage(gamedata.sprites["_armor_body.png"], 99, 14 + i * 20); break;
+                case "arm":        render.drawImage(gamedata.sprites["_armor_arm.png"],  99, 14 + i * 20); break;
+                case "weapon":     render.drawImage(gamedata.sprites["_weapon.png"],     99, 14 + i * 20); break;
+                case "key":        render.drawImage(gamedata.sprites["_key.png"],        99, 14 + i * 20); break;
+                case "consumable": render.drawImage(gamedata.sprites["_consumable.png"], 99, 14 + i * 20); break;
             }
             Renderer.drawString(items[i].display_name, 120, 26 + i * 20);
         }
